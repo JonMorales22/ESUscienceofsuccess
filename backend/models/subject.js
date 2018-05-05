@@ -5,4 +5,6 @@ const SubjectsSchema = new Schema({
 	age: Number,
 	year: String,
 	ethnicity: String
-})
+}, { timestamps: true });
+
+export default mongoose.model('Subject', SubjectsSchema);
