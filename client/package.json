@@ -17,7 +17,7 @@
     "test": "react-scripts test --env=jsdom",
     "start:server": "cd ../backend && nodemon server.js --exec babel-node --presets es2015,stage-0",
     "start:client": "yarn start",
-    "start:dev": "concurrently \"yarn start:server\" \"yarn start:client\"",
+    "start:dev": "concurrently \"mongod\" \"yarn start:server\" \"yarn start:client\"",
     "eject": "react-scripts eject"
   },
   "devDependencies": {

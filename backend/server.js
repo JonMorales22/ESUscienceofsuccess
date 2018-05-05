@@ -16,8 +16,8 @@ const router = express.Router();
 const API_PORT = process.env.API_PORT || 3001;
 
 //connect to mongoDB
-const options = {
-
+const db = {
+  dbName: 'researchly-test'
 }
 
 mongoose.connect('mongodb://localhost:27017/', {dbName: 'researchly-test'} ,(error) => {
@@ -25,7 +25,7 @@ mongoose.connect('mongodb://localhost:27017/', {dbName: 'researchly-test'} ,(err
 		console.error("Couldn't connect to MongoDB!!")
 		throw error;
 	}
-	console.log("Connected to mongoDB...?")
+	console.log("Connected to mongodb://localhost:27017/" + db.dbName);
 })
 
 
@@ -51,17 +51,31 @@ router.get('/tests', (req, res) => {
 router.post('/tests', (req, res) => {
   const test = new Test();
   // body parser lets us use the req.body
-  const { name, numOfTrials, numOfQuestions } = req.body;
-  if (!name || !numOfTrials || !numOfQuestions) {
+  const { name, trials, questions } = req.body;
+  if (!name) {
     // we should throw an error. we can do this check on the front end
     return res.json({
       success: false,
-      error: 'You must provide a Test name, the number of triales, and the number of questions!'
+      error: 'You must provide a Test name!'
+    });
+  }
+  else if (!trials) {
+    // we should throw an error. we can do this check on the front end
+    return res.json({
+      success: false,
+      error: 'You must provide an array of trials!'
+    });
+  }
+  else if (!questions) {
+    // we should throw an error. we can do this check on the front end
+    return res.json({
+      success: false,
+      error: 'You must provide an array of questions!'
     });
   }
   test.name = name;
-  test.numOfTrials = numOfTrials;
-  test.numOfQuestions = numOfQuestions;
+  test.trials = trials;
+  test.questions = questions;
   test.save(err => {
     if (err) return res.json({ success: false, error: err });
     return res.json({ success: true });
