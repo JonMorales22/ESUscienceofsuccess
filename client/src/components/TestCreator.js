@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Redirect,Link } from 'react-router-dom'
 import 'whatwg-fetch';
 //import {Sidebar} from './Sidebar.js'
 
@@ -18,16 +19,19 @@ class TestCreator extends Component {
     super(props)
     // these two arrays are used as 'placeholders' for our questions and trials states.
     // right now they are being filled with dummy info fo testing, but later they will be filled with empty strings
-    let trialsArr = this.initializeData(this.props.numberOfTrials, 'trial');
-    let questsArr = this.initializeData(this.props.numberOfQuestions*this.props.numberOfTrials, 'question')
-
+    //let trialsArr = this.initializeData(this.props.numberOfTrials, 'trial');
+    //let questsArr = this.initializeData(this.props.numberOfQuestions*this.props.numberOfTrials, 'question')
+    
+    let questsArr = this.initializeData(20, 'question')
+    let trialsArr = this.initializeData(5, 'trial');
     this.state = {
-      name: 'submitTest3',
-      numTrials: this.props.numberOfTrials, //hardcoded at 5 for right now, later we'll figure out how to make this dynamic
-      numQuest: this.props.numberOfQuestions,  //hardcoded at 4 for right now, later we'll figure out how to make this dynamic
+      name: 'submitTest8',
+      numTrials: 5, //hardcoded at 5 for right now, later we'll figure out how to make this dynamic
+      numQuest: 4,  //hardcoded at 4 for right now, later we'll figure out how to make this dynamic
       trials: trialsArr, //dummy placeholder our trials states, when the user fills in the trials questions the state will update
       questions: questsArr, //same idea as above, but this changes the questions state
       error: null,
+      submit: false,
     }
 
     //binding the events to the object
@@ -183,6 +187,7 @@ class TestCreator extends Component {
     //test 1
     .then(res => res.json()).then((res) => {
       console.log(res);
+      this.setState({submit: true})
     })
 
 
@@ -221,8 +226,12 @@ class TestCreator extends Component {
       -the forms for to get info for our trials and questions.
   */
   render() {
-    let forms = this.renderForms();
+    if(this.state.submit===true) {
+      return <Redirect to='/' />
+    }
 
+    else {
+    let forms = this.renderForms();
     return (
       <div className="App">
           	Test Name:
@@ -248,6 +257,7 @@ class TestCreator extends Component {
           </form>
       </div>
     );
+  }
   }
 }
 

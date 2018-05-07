@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {RadioGroup, Radio} from 'react-radio-group'
+import { Link } from 'react-router-dom'
 import 'whatwg-fetch';
 
 class TestDashboard extends Component {
@@ -64,8 +65,9 @@ class TestDashboard extends Component {
 		let testList = this.renderTests();
 		return(
 			<div className='App'>
+				<Link to="/test-creator"> <button>Test Creator</button> </Link>
 				<form onSubmit={this.handleSubmit}>
-					<button type='button'>Create New Test</button>
+					{/*<button type='button'>Create New Test</button>*/}
 						<div className='testlist'>
 							<h1>Tests:</h1>
 							{testList}
