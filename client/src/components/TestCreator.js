@@ -22,11 +22,12 @@ class TestCreator extends Component {
     let questsArr = this.initializeData(this.props.numberOfQuestions*this.props.numberOfTrials, 'question')
 
     this.state = {
-      testName: '',
-      numTrials: 5, //hardcoded at 5 for right now, later we'll figure out how to make this dynamic
-      numQuest: 4,  //hardcoded at 4 for right now, later we'll figure out how to make this dynamic
+      name: 'submitTest3',
+      numTrials: this.props.numberOfTrials, //hardcoded at 5 for right now, later we'll figure out how to make this dynamic
+      numQuest: this.props.numberOfQuestions,  //hardcoded at 4 for right now, later we'll figure out how to make this dynamic
       trials: trialsArr, //dummy placeholder our trials states, when the user fills in the trials questions the state will update
-      questions: questsArr //same idea as above, but this changes the questions state
+      questions: questsArr, //same idea as above, but this changes the questions state
+      error: null,
     }
 
     //binding the events to the object
@@ -127,7 +128,7 @@ class TestCreator extends Component {
   // }
 
   changeTestName(event) {
-    this.setState({testName: event.target.value})
+    this.setState({name: event.target.value})
   }
   
   /*
@@ -165,13 +166,51 @@ class TestCreator extends Component {
   */
   handleSubmit(event) {
     event.preventDefault();
-    const { name, trials, comment } = this.state 
-    let testData = this.state.trials
-    let questData = this.state.questions
+    const { name, trials, questions } = this.state; 
+    if(!name || !trials || !questions) {
+      console.log("Must input a test name and fill out all trials and questions!")
+      return;
+    }
+    fetch('/api/tests', {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, trials, questions }) ,
+    })
+    // .then(res => res.json(){
+    //   console.log(res);
+    // })
+
+    //test 1
+    .then(res => res.json()).then((res) => {
+      console.log(res);
+    })
+
+
+    //test 2
+    // .then((res) => {
+    //   if(!res.success) {
+    //     console.log('error in if statement!')
+    //     this.setState({ error: res.error.message || res.error });
+    // }
+    //   else {
+    //     console.log('we made it?')
+    //     let totalNumberOfQuestions = this.state.numberOfTrials * this.state.numberOfQuestions;
+    //     let trialsArr = this.initializeData(this.state.numberOfTrials, 'trial');
+    //     let questionsArr = this.initialzeData(totalNumberOfQuestions, 'questions');
+    //     this.setState({ testName: "", trials: trialsArr, questions: questionsArr, error: null });
+    //   }
+    // }).catch((reason) => {
+    //   console.log("Caught exception: " + reason);
+    // });
+
+
+    // let testData = this.state.trials
+    // let questData = this.state.questions
     
     //WAS ABOUT TO PUT IN METHODS TO BALIDATE TRIALS AND QUESTIONS ARRAY, BUT MAYBE ITS BETTER TO VALIDAE IN OUR SCHEMA!!!
-    console.log(testData);
-    console.log(questData);
+    console.log(name);
+    console.log(trials);
+    console.log(questions);
     
 
   }
@@ -187,7 +226,8 @@ class TestCreator extends Component {
     return (
       <div className="App">
           	Test Name:
-            <input type='text' value={this.state.testName}  onChange={this.changeTestName} />
+            <input type='text' value={this.state.name}  onChange={this.changeTestName} readOnly/>
+            {/* <input type='text' value={this.state.testName}  onChange={this.changeTestName} /> */}
             Number of Trials:
             {/* Setting these 2 forms to read only for now, later I'll figure out how to create the number of trials and questions based on user input*/}
             <input type='number' value={this.state.numTrials} readOnly />
@@ -199,7 +239,7 @@ class TestCreator extends Component {
             <hr />
 
           <form onSubmit={this.handleSubmit}>
-            <h1>Test Name: {this.state.testName}</h1>
+            <h1>Test Name: {this.state.name}</h1>
 
             <div className="trials-holder">
               {forms}

@@ -1,7 +1,8 @@
 //server/routes.js
 import bodyParser from 'body-parser';
-import Test from './models/test'
-import Subject from './models/subject'
+import Test from './models/test';
+import Subject from './models/subject';
+import Response from './models/response';
 
 var express = require('express');
 var router = express.Router();
@@ -11,7 +12,7 @@ router.get('/', function(req, res){
 });
 
 
-/**************** TEST ROUTES API ***********************/
+/**************** TEST ROUTES API ************************/
 router.get('/tests', (req, res) => {
   Test.find((err, tests) => {
     if (err) return res.json({ success: false, error: err });
@@ -106,5 +107,61 @@ router.post('/subjects', (req, res) => {
 });
 /************************************************************/
 
+//subjectId: 5aed16a156530645e150e51f
+//testId: 5aecf96f5e5eea3e81980f70
+/**************** RESPONSE ROUTES API ************************/
+
+router.get('/responses', (req, res) => {
+  Response.find((err, responses) => {
+    if(err) return res.json({ success: false, error: err });
+    return res.json({ success: true, responses: responses });
+  });
+});
+
+router.post('/responses', (req, res) => {
+  const response  = new Response();
+  const { subjectId, testId, trialIndex, questionIndex, data } = req.body;
+  if(!subjectId) {
+      return res.json({
+        success: false,
+        error: 'Need a subjectId!'
+      });
+  }
+  else if (!testId) {
+      return res.json({
+        success: false,
+        error: 'Need a testId!'
+      });
+  }
+  else if (!trialIndex) {
+      return res.json({
+        success: false,
+        error: 'Must provide a test index!!'
+      });
+  }
+  else if (!questionIndex) {
+      return res.json({
+        success: false,
+        error: 'Must provide a question index!'
+      });
+  }
+  else if (!data) {
+      return res.json({
+        success: false,
+        error: 'Must provide data!'
+      });
+  }
+  response.subjectId = subjectId;
+  response.testId = testId;
+  response.trialIndex = trialIndex;
+  response.questionIndex = questionIndex;
+  response.data = data;
+  response.save(err => {
+    if(err) return res.json({ success: false, error: err});
+    return res.json({ success: true });
+  });
+});
+
+/*************************************************************/
 
 export default router;
