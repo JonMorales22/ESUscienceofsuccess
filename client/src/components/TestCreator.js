@@ -26,7 +26,7 @@ class TestCreator extends Component {
     let questsArr = this.initializeData(20, 'question')
     let trialsArr = this.initializeData(5, 'trial');
     this.state = {
-      name: 'submitTest8',
+      name: '',
       numTrials: 5, //hardcoded at 5 for right now, later we'll figure out how to make this dynamic
       numQuest: 4,  //hardcoded at 4 for right now, later we'll figure out how to make this dynamic
       trials: trialsArr, //dummy placeholder our trials states, when the user fills in the trials questions the state will update
@@ -228,7 +228,7 @@ class TestCreator extends Component {
       -the forms for to get info for our trials and questions.
   */
   render() {
-    if(this.state.submit===true) {
+    if(this.state.submit === true) {
       return <Redirect to='/' />
     }
     else {
@@ -236,7 +236,7 @@ class TestCreator extends Component {
     return (
       <div className="App">
           	Test Name:
-            <input type='text' value={this.state.name}  onChange={this.changeTestName} readOnly/>
+            <input type='text' value={this.state.name}  onChange={this.changeTestName}/>
             {/* <input type='text' value={this.state.testName}  onChange={this.changeTestName} /> */}
             Number of Trials:
             {/* Setting these 2 forms to read only for now, later I'll figure out how to create the number of trials and questions based on user input*/}
