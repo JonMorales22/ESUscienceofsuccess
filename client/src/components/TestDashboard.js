@@ -9,9 +9,9 @@ class TestDashboard extends Component {
 		this.state = {
 			tests: [],
 			error: null,
-			index: 0
+			index: -1
 		}
-		this.handleSubmit = this.handleSubmit.bind(this);
+		this.handleClick = this.handleClick.bind(this);
 		this.handleChange = this.handleChange.bind(this);
 	}
 
@@ -40,12 +40,22 @@ class TestDashboard extends Component {
 	componentDidMount() {
 		this.loadTestsFromServer();
 	}
-
-	handleSubmit(event) {
-		event.preventDefault();
-
-		let selectedTest = this.state.tests[this.state.index]
-		console.log(selectedTest)
+	
+	//testid: 5af0a171aab97e1305007f0d
+	//testName: submitTest2
+	onDeleteTest = () => {
+		let test = this.state.tests[this.state.index];
+		let id = test._id;
+		let data = [
+			...this.state.tests.slice(0,this.state.index),
+			...this.state.tests.slice(this.state.index+1)
+		]
+		this.setState({ tests: data })
+		fetch(`/api/tests/${id}`, { method: 'DELETE' })
+		.then(res => res.json()).then((res) => {
+			if(!res.success) this.setState({ error: res.error});
+			else console.log('Deleted!');
+		})
 	}
 
 	loadTestsFromServer = () => {
@@ -61,12 +71,24 @@ class TestDashboard extends Component {
 		this.setState({ index: value })
 	}
 
+	handleClick(event) {
+		let type = event.target.name;
+		if(type === 'view') {
+			console.log('view');
+		}
+		else if(type === 'delete') {
+			this.onDeleteTest();
+		}
+		else if(type === 'export') {
+			console.log('export');
+		}
+	}
+
 	render() {
 		let testList = this.renderTests();
 		return(
 			<div className='App'>
 				<Link to="/test-creator"> <button>Test Creator</button> </Link>
-				<form onSubmit={this.handleSubmit}>
 					{/*<button type='button'>Create New Test</button>*/}
 						<div className='testlist'>
 							<h1>Tests:</h1>
@@ -78,9 +100,11 @@ class TestDashboard extends Component {
 							</RadioGroup>
 							*/}
 						</div>
-						<button type='submit'>Export</button>
-						<button type='button'>Delete</button>
-				</form>
+						<div className = 'btn-holder'>
+							<button name='view' onClick={this.handleClick}> View </button>
+							<button name='export' onClick={this.handleClick}> Export </button>
+							<button name='delete' onClick={this.handleClick}> Delete </button>
+						</div>
 			</div>
 		)
 	}

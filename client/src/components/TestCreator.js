@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Redirect,Link } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 import 'whatwg-fetch';
 //import {Sidebar} from './Sidebar.js'
 
@@ -12,6 +12,7 @@ import 'whatwg-fetch';
   Props: 
     Trials - number of trials per test
     Questions - number of questions per trial
+    possible a readonly state...?
  */
 
 class TestCreator extends Component {
@@ -32,6 +33,7 @@ class TestCreator extends Component {
       questions: questsArr, //same idea as above, but this changes the questions state
       error: null,
       submit: false,
+      viewOnly: false
     }
 
     //binding the events to the object
@@ -229,7 +231,6 @@ class TestCreator extends Component {
     if(this.state.submit===true) {
       return <Redirect to='/' />
     }
-
     else {
     let forms = this.renderForms();
     return (

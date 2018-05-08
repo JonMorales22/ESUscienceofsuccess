@@ -13,13 +13,28 @@ router.get('/', function(req, res){
 
 
 /**************** TEST ROUTES API ************************/
+
+//gets ALL tests from db
 router.get('/tests', (req, res) => {
-  Test.find((err, tests) => {
-    if (err) return res.json({ success: false, error: err });
+  Test.find((error, tests) => {
+    if (error) return res.json({ success: false, error: error });
     return res.json({ success: true, tests: tests });
   });
 });
 
+//gets ONE test from db
+router.get('/tests/:testId', (req, res) => {
+  const { testId } =req.params;
+  if(!testId) {
+    return res.json({ success: false, error: 'No test id provided!'});
+  }
+  Test.find({ _id: testId}, (error, test) => {
+    if(error) return res.json({ success: false, error });
+    return res.json({ success: true, test})
+  });
+}) 
+
+//adds a new test to the database
 router.post('/tests', (req, res) => {
   const test = new Test();
   // body parser lets us use the req.body
@@ -48,8 +63,8 @@ router.post('/tests', (req, res) => {
   test.name = name;
   test.trials = trials;
   test.questions = questions;
-  test.save(err => {
-    if (err) return res.json({ success: false, error: err });
+  test.save(error => {
+    if (error) return res.json({ success: false, error: error });
     return res.json({ success: true });
   });
 });
@@ -70,8 +85,8 @@ router.delete('/tests/:testId', (req, res) => {
 
 /**************** SUBJECT ROUTES API ************************/
 router.get('/subjects', (req, res) => {
-  Subject.find((err, subjects) => {
-    if (err) return res.json({ success: false, error: err });
+  Subject.find((error, subjects) => {
+    if (error) return res.json({ success: false, error: error });
     return res.json({ success: true, subjects: subjects });
   });
 });
@@ -100,8 +115,8 @@ router.post('/subjects', (req, res) => {
   subject.age = age;
   subject.year = year;
   subject.ethnicity = ethnicity;
-  subject.save(err => {
-    if(err) return res.json({ success: false, error: err});
+  subject.save(error => {
+    if(error) return res.json({ success: false, error: error});
     return res.json({ success: true });
   });
 });
@@ -112,8 +127,8 @@ router.post('/subjects', (req, res) => {
 /**************** RESPONSE ROUTES API ************************/
 
 router.get('/responses', (req, res) => {
-  Response.find((err, responses) => {
-    if(err) return res.json({ success: false, error: err });
+  Response.find((error, responses) => {
+    if(error) return res.json({ success: false, error: error });
     return res.json({ success: true, responses: responses });
   });
 });
@@ -156,8 +171,8 @@ router.post('/responses', (req, res) => {
   response.trialIndex = trialIndex;
   response.questionIndex = questionIndex;
   response.data = data;
-  response.save(err => {
-    if(err) return res.json({ success: false, error: err});
+  response.save(error => {
+    if(error) return res.json({ success: false, error: error});
     return res.json({ success: true });
   });
 });
