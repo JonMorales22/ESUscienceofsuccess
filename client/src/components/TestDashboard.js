@@ -87,18 +87,20 @@ class TestDashboard extends Component {
 	}
 	
 	onDeleteTest = () => {
-		let test = this.state.tests[this.state.index];
-		let id = test._id;
-		let data = [
-			...this.state.tests.slice(0,this.state.index),
-			...this.state.tests.slice(this.state.index+1)
-		]
-		this.setState({ tests: data,index: -1 })
-		fetch(`/api/tests/${id}`, { method: 'DELETE' })
-		.then(res => res.json()).then((res) => {
-			if(!res.success) this.setState({ error: res.error});
-			else console.log('Deleted!');
-		})
+		if(this.state.tests.length>0) {
+			let test = this.state.tests[this.state.index];
+			let id = test._id;
+			let data = [
+				...this.state.tests.slice(0,this.state.index),
+				...this.state.tests.slice(this.state.index+1)
+			]
+			this.setState({ tests: data,index: -1 })
+			fetch(`/api/tests/${id}`, { method: 'DELETE' })
+			.then(res => res.json()).then((res) => {
+				if(!res.success) this.setState({ error: res.error});
+				else console.log('Deleted!');
+			})
+		}
 	}
 
 	loadTestsFromServer = () => {

@@ -57,14 +57,6 @@ class TestViewer extends Component {
   }
 
   /*
-    renderSideBar
-      creates our sidebar component, NOT REALLY GOING TO WORRY ABOUT HIS FOR RIGHT NOW!!!
-  */
-  // renderSideBar(numArr, numQuest) {
-  //   return(<Sidebar numbers={numArr} numQuest={numQuest} />)
-  // }
-
-  /*
     renders: 
       -forms to collect other data (such as test name, # of trials per test, # of questions per trial)
       -the forms for to get info for our trials and questions.
