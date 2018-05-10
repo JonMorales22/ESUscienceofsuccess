@@ -93,13 +93,19 @@ router.get('/subjects', (req, res) => {
 
 router.post('/subjects', (req, res) => {
 	const subject = new Subject();
-	const { age, year, ethnicity } = req.body;
+	const { age, gender, year, ethnicity } = req.body;
 	if(!age) {
 	    return res.json({
 	      success: false,
 	      error: 'You must provide an age!'
 	    });
 	}
+  else if (!gender) {
+      return res.json({
+        success: false,
+        error: 'You must provide a gender!'
+      });
+  }
 	else if (!year) {
 	    return res.json({
 	      success: false,
@@ -113,6 +119,7 @@ router.post('/subjects', (req, res) => {
 	    });
 	}
   subject.age = age;
+  subject.gender = gender;
   subject.year = year;
   subject.ethnicity = ethnicity;
   subject.save(error => {

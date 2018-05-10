@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom'
 
 class DemographicSurvey extends Component {
 	constructor(props) {
@@ -11,7 +12,25 @@ class DemographicSurvey extends Component {
 			submit: false,
 		});
 
+		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleChange = this.handleChange.bind(this);
+	}
+
+	saveSubject() {
+		const {age, gender, ethnicity, year} = this.state;
+		if(!age || !gender || !ethnicity || !year) {
+			console.log("Must input age, gender, ethnicity, and year!");
+			return;
+		}
+		fetch('api/subjects', {
+			method: 'POST',
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ age, gender, ethnicity, year }),
+		})
+		.then(res => res.json()).then((res) => {
+			console.log(res);
+			this.setState({ submit: true});
+		});
 	}
 
 	renderAgeForm() {
@@ -40,9 +59,17 @@ class DemographicSurvey extends Component {
 		}	
 	}
 
+	handleSubmit(event) {
+		event.preventDefault();
+		this.saveSubject();
+	}
+
 	render () {
 		let ageForm = this.renderAgeForm();
+		if(this.state.submit === true) 
+			return <Redirect to='/test-taker'/>
 		return (
+			<form onSubmit={this.handleSubmit}>
 				<div className='demographic-survey'>
 					<h3>Demographic Questions</h3>
 					Age: {ageForm}
@@ -54,7 +81,7 @@ class DemographicSurvey extends Component {
 						<option value='female'>Female</option>
 						<option value='nonbinary'>Non-Binary</option>
 						<option value='other'>Other</option>
-						<option value='na'>Prefer not to answer</option>
+						<option value='none'>Prefer not to answer</option>
 					</select>
 
 					<br/>
@@ -64,7 +91,12 @@ class DemographicSurvey extends Component {
 						<option value='sophomore'>Sophomore</option>
 						<option value='junior'>Junior</option>
 						<option value='senior'>Senior</option>
-						<option value='na'>Prefer not to answer</option>
+						<option value='bachelor'>Associates</option>
+						<option value='bachelor'>Bachelors</option>
+						<option value='masters'>Masters</option>
+						<option value='doctorate'>Doctorate</option>
+						<option value='other'>Other</option>
+						<option value='none'>Prefer not to answer</option>
 					</select>
 
 					<br/>
@@ -77,9 +109,11 @@ class DemographicSurvey extends Component {
 						<option value='native american'>Native American</option>
 						<option value='pacific islander'>Pacific Islander</option>
 						<option value='other'>Other</option>
-						<option value='na'>Prefer not to answer</option>
+						<option value='none'>Prefer not to answer</option>
 					</select>
 				</div>
+				<input type='submit' value='Submit'/>
+			</form>
 		)
 	}
 }

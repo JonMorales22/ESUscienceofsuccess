@@ -1,59 +1,57 @@
 import React, { Component } from 'react';
 import DemographicSurvey from './DemographicSurvey'
-
+import 'whatwg-fetch';
+//test_id: 5af3d1221b046d57ae4dd0d2 <-- currently using this for debugging
 class TestTaker extends Component {
 	constructor() {
 		super();
 		this.state = ({
-			showDemographicSurvey: true,
+			test_id: '5af3d1221b046d57ae4dd0d2',
+			test: null,
+			trials: null,
+			questions: null,
 		});
 		//this.handleClick = this.handleClick.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 	}
 
-	// handleClick(event) {
-	// 	let type = event.target.name;
-	// 	let value = event.target.value;
-	// 	if(type === 'continue') {
-			
-	// 	}
-	// }
+	componentDidMount() {
+		this.loadTest();
+	}
+
+	loadTest = () => {
+		let test_id = this.state.test_id;
+		fetch(`/api/tests/${test_id}`, { method: 'GET' })
+		.then(data => data.json())
+		.then((res) => {
+			if(!res.success) this.setState({ error: res.error});
+			else {
+				this.setState({ test: res.test[0], trials: res.test[0].trials, questions: res.test[0].questions })
+				console.log('Success!');
+			} 
+		})
+	}
 
 	handleSubmit(event) {
 		event.preventDefault();
-		console.log('handle submit')
-		
 		let type = event.target.name;
 		let value = event.target.value;
-		
-		if(type === 'demographics') {
-			this.saveSubject();
-			this.setState({ showDemographicSurvey: false })
-		}
 	}
 
 	render() {
-		let submitButton = (<button name='continue' type='submit' onClick={this.handleClick}> Continue...? </button>)
-		if(this.state.showDemographicSurvey) {
+		if(this.state.trials) {
 			return(
-				<form name='demographics' onSubmit={this.handleSubmit}>
-					<div className='demographic-survey'>
-						<h1>Test Taker</h1>
-						<DemographicSurvey />
-						<input type='submit' value='Submit'/>
-					</div>
-				</form>
-			)
+				<div className='test-taker'>
+					<h1>Trial 1</h1>
+					<textarea name='trial' rows='10' cols='50' value={this.state.trials[0]} readOnly></textarea>
+				</div>
+			);
 		}
 		else {
 			return (
-				<div className='test-taker'>
-					<h1>Trial 1</h1>
-					<textarea name='trial' rows='10' cols='50' value='This is the info for trial 1.' readOnly></textarea>
-				</div>
+				<p>There's nothing here!</p>
 			)
 		}
-
 	}
 }
 
