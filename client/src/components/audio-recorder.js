@@ -61,13 +61,13 @@ export class AudioRecorder extends Component {
 
 	render() {
 		return(
-			<div>
+			<div className='audio-recorder'>
 				<ReactMic
 					record={this.state.record}
 					className='sound-wave'
 					onStop={this.onStop}
 					strokeColor='#000000'
-					backgroundColor='#90c4f3' />
+					backgroundColor='#FFF' />
 				<div className='button-holder'>
 					<button onClick={this.startRecording} type='button'>Start Recording</button>
 					<button onClick={this.stopRecording} type='button'>Stop Recording</button>

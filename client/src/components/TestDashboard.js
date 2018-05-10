@@ -25,6 +25,7 @@ class TestDashboard extends Component {
 			let questions = test.questions;
 			let maxRows = 4;
 			trialsForms.push(<h1>Test Name:{test.name}</h1>)
+			trialsForms.push(<h3>Test Id:{test._id}</h3>)
 		    for(let x=0;x<trials.length;x++)
 		    {
 		      //array to hold our questions forms
