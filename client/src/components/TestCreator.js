@@ -229,12 +229,12 @@ class TestCreator extends Component {
   */
   render() {
     if(this.state.submit === true) {
-      return <Redirect to='/' />
+      return <Redirect to='/dashboard' />
     }
     else {
     let forms = this.renderForms();
     return (
-      <div className="App">
+      <div className="test-creator">
           	Test Name:
             <input type='text' value={this.state.name}  onChange={this.changeTestName}/>
             {/* <input type='text' value={this.state.testName}  onChange={this.changeTestName} /> */}

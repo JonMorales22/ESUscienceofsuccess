@@ -9,6 +9,7 @@ class TestDashboard extends Component {
 		super(props)
 		this.state = {
 			tests: [],
+			view: false,
 			error: null,
 			index: -1
 		}
@@ -119,8 +120,7 @@ class TestDashboard extends Component {
 	handleClick(event) {
 		let type = event.target.name;
 		if(type === 'view') {
-			let test = this.state.tests[this.state.index];
-			console.log(test);
+			this.setState({ view: !this.state.view})
 		}
 		else if(type === 'delete') {
 			this.onDeleteTest();
@@ -132,9 +132,15 @@ class TestDashboard extends Component {
 
 	render() {
 		let testList = this.renderTestList();
-		let test = this.renderSingleTest( this.state.index );
+		let test = [];
+
+		if(this.state.view)
+			test= this.renderSingleTest( this.state.index );
+		else
+			test = [];
+
 		return(
-			<div className='App'>
+			<div className='dashboard'>
 				<Link to="/test-creator"> <button>Create New Test</button> </Link>
 					{/*<button type='button'>Create New Test</button>*/}
 						<div className='testlist'>
