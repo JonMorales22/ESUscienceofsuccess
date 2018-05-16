@@ -3,7 +3,12 @@ import DemographicSurvey from './DemographicSurvey'
 import Modal from 'react-modal';
 import Question from './Question'
 import AudioRecorder from './audio-recorder'
+import { observable, computed, action } from "mobx";
 import 'whatwg-fetch';
+
+class TestStore {
+	@observable questions = [];
+}
 
 const customStyles = {
   content : {
