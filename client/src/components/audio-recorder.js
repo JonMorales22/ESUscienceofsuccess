@@ -1,17 +1,30 @@
 import React, { Component } from 'react';
 import {ReactMic} from 'react-mic';
+import { observer } from "mobx-react";
 
+
+let initialState = ({
+	record: false,
+	latency: -1,
+	audiofile: {
+		blob: null,
+		blobURL: 'test',
+	}
+});
+
+@observer
 export class AudioRecorder extends Component {
 	constructor(props) {
 		super(props);
-		this.state = ({
-			record: false,
-			latency: -1,
-			audiofile: {
-				blob: null,
-				blobURL: "test"
-			}
-		})
+		this.state = (initialState);
+		// this.state = ({
+		// 	record: false,
+		// 	latency: -1,
+		// 	audiofile: {
+		// 		blob: null,
+		// 		blobURL: "test"
+		// 	}
+		// });
 		this.startRecording = this.startRecording.bind(this)
 		this.stopRecording = this.stopRecording.bind(this)
 		this.onStop = this.onStop.bind(this)
@@ -49,14 +62,22 @@ export class AudioRecorder extends Component {
 	}
 
 	onStop(recordedBlob) {
-		console.log('Recorded blob is:', recordedBlob);
-		this.setState({
-			audiofile: recordedBlob
-		})
+		console.log(recordedBlob);
+		if(recordedBlob) {
+			this.props.store.setResponse();
+			console.log('Recorded blob is:', recordedBlob);
+			this.setState({
+				audiofile: recordedBlob
+			})
+		}
 	}
 
 	findLatency(startTime, endTime) {
 		return (endTime-startTime)/1000; //divide by 1000 to strip the miliseconds
+	}
+
+	reset() {
+		this.setState(initialState);
 	}
 
 	render() {
