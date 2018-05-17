@@ -184,6 +184,23 @@ router.post('/responses', (req, res) => {
   });
 });
 
+router.post('/audioresponse', (req, res) => {
+  const response = new Response();
+  const audiofile = req.body;
+  if(!audiofile) {
+      return res.json({
+        success: false,
+        error: 'no audiofile detected!'
+      });
+  }
+  response.blob = audiofile;
+  console.log(audiofile);
+  response.save(error => {
+    if(error) return res.json({ success: false, error: error});
+    return res.json({ success: true });
+  });
+});
+
 /*************************************************************/
 
 export default router;

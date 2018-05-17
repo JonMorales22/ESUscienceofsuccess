@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import DemographicSurvey from './DemographicSurvey';
 import Modal from 'react-modal';
 import Question from './Question';
 import AudioRecorder from './audio-recorder';
@@ -8,6 +7,8 @@ import 'whatwg-fetch';
 import { observer } from "mobx-react";
 import ResponseStore from '../stores/ResponseStore.js';
 import DevTools from "mobx-react-devtools";
+
+const fs = require('fs');
 
 //for right now just going to implement a question store which will be simpler, later I can implement a full test store if necessary.
 // class TestStore {
@@ -72,7 +73,6 @@ class TestTaker extends Component {
 			modalIsOpen: true,
 		});
 		this.handleClick = this.handleClick.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
 		this.openModal = this.openModal.bind(this);
 		this.closeModal = this.closeModal.bind(this);
 	}
@@ -99,6 +99,34 @@ class TestTaker extends Component {
 		})
 	}
 
+	saveResponse = () => {
+		let index = responseStore.index;
+		let response = responseStore.responses[index];
+		let audiofile = response.audiofile;
+		let blob = audiofile.blob;
+		let blobURL = audiofile.bloblURL
+		if(!blob) {
+			console.log('audiofile doesn not exist!');
+			return;
+		}
+		//let foo = new Buffer(audiofile,'binary').toString("base64");
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			let base64 = reader.result;
+			//base64 = base64.substr(base64.indexOf(',')+1);
+			fetch('/api/audioresponse', {
+				method: 'POST',
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ base64 }),
+			})
+			.then(res => res.json()).then((res) => {
+				console.log(res);
+			});
+		});
+		reader.readAsDataURL(blob);
+
+	}
+
 	incrementTrialsIndex() {
 		this.setState(prevState => {
 			//console.log("trials length: " + this.state.trials.length);
@@ -119,7 +147,7 @@ class TestTaker extends Component {
 
 	handleClick(event) {
 		let type = event.target.name;
-		let value = event.target.value;
+		//let value = event.target.value;
 		if(type === 'next') {
 			let index = responseStore.index;
 			let response = responseStore.responses[index];
@@ -128,23 +156,24 @@ class TestTaker extends Component {
 				responseStore.setSkip();
 			}
 			else if( response.hasResponse || (!response.hasResponse && response.canSkip)) {
-				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
-					this.incrementTrialsIndex();
-					this.openModal();
-				}
-				if(this.state.questionsIndex < this.state.questions.length-1) {
-					responseStore.incrementIndex();
-					this.incrementIndex();
-				}
+				this.saveResponse();
+				// if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
+				// 	this.incrementTrialsIndex();
+				// 	this.openModal();
+				// }
+				// if(this.state.questionsIndex < this.state.questions.length-1) {
+				// 	responseStore.incrementIndex();
+				// 	this.incrementIndex();
+				// }
 			}
 		}
 	}
 
-	handleSubmit(event) {
-		event.preventDefault();
-		let type = event.target.name;
-		let value = event.target.value;
-	}
+	// handleSubmit(event) {
+	// 	event.preventDefault();
+	// 	let type = event.target.name;
+	// 	let value = event.target.value;
+	// }
 
 	openModal() {
 		this.setState({modalIsOpen: true});
@@ -157,8 +186,8 @@ class TestTaker extends Component {
 
 
 	render() {
-		let index = responseStore.index;
-		let response = responseStore.responses[index];
+		//let index = responseStore.index;
+		//let response = responseStore.responses[index];
 		if(this.state.trials && this.state.questions && !this.state.showStartDialogue) {
 			return(
 				<div className='test-taker'>

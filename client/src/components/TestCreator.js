@@ -180,7 +180,7 @@ class TestCreator extends Component {
     fetch('/api/tests', {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, trials, questions }) ,
+      body: JSON.stringify({ name, trials, questions }),
     })
     // .then(res => res.json(){
     //   console.log(res);

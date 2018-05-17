@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import {RadioGroup, Radio} from 'react-radio-group'
-import { Route, Redirect, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import 'whatwg-fetch';
-import TestViewer from './TestViewer'
+//import TestViewer from './TestViewer'
 
 class TestDashboard extends Component {
 	constructor(props) {
@@ -33,7 +33,7 @@ class TestDashboard extends Component {
 		      for(let y=0;y<4;y++) {
 		        
 		        //index used to map our 1d array to 2 dimensions
-		 		console.log(i)
+		 		//console.log(i)
 		        let i = (x*maxRows)+y;
 		        questForms.push(
 		          <div className='question' key={i}>

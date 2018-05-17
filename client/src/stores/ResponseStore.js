@@ -1,4 +1,4 @@
-import { observable, computed, action } from "mobx";
+import { observable, action } from "mobx";
 
 class ResponseStore {
 	@observable responses = [];
@@ -9,6 +9,7 @@ class ResponseStore {
 			this.responses.push({
 				hasResponse: false,
 				canSkip: false,
+				audiofile: null,
 			});
 	}
 
@@ -27,6 +28,11 @@ class ResponseStore {
 	setResponse() {
 		console.log('setResponse');
 		this.responses[this.index].hasResponse = true;
+	}
+
+	@action.bound
+	setAudiofile(audiofile) {
+		this.responses[this.index].audiofile = audiofile;
 	}
 }
 

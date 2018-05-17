@@ -24,3 +24,21 @@ body {
 .btn{
 	color: #111;
 }
+
+.record-icon-on {
+	opacity: 1;
+	animation: fade 2s infinite;
+}
+
+@keyframes fade {
+	0%, 100% { opacity: 0 }
+	50% { opacity: 1 }
+} 
+
+.record-icon-off {
+	opacity: 0.25;
+}
+
+.sound-wave {
+	display: none;
+}
