@@ -5,16 +5,19 @@ import 'whatwg-fetch';
 //import TestViewer from './TestViewer'
 
 class TestDashboard extends Component {
-	constructor(props) {
-		super(props)
+	constructor() {
+		super()
 		this.state = {
 			tests: [],
+			username: '',
+			password: '',
 			view: false,
 			error: null,
 			index: -1
 		}
 		this.handleClick = this.handleClick.bind(this);
-		this.handleChange = this.handleChange.bind(this);
+		this.handleListChange = this.handleListChange.bind(this);
+		this.handleInputChange = this.handleInputChange.bind(this);
 	}
 
 	renderSingleTest(index) {
@@ -78,7 +81,7 @@ class TestDashboard extends Component {
 			</label>
 		);
 		return (
-			<RadioGroup name='test' selectedValue={this.state.selectedValue} onChange={this.handleChange}>
+			<RadioGroup name='list' selectedValue={this.state.selectedValue} onChange={this.handleListChange}>
 				{listItems}
 			</RadioGroup>
 		)
@@ -89,18 +92,28 @@ class TestDashboard extends Component {
 	}
 	
 	onDeleteTest = () => {
-		if(this.state.tests.length>0) {
+		if(this.state.tests.length>0&&this.state.index>0) {
+			const { username, password } = this.state;
 			let test = this.state.tests[this.state.index];
 			let id = test._id;
-			let data = [
-				...this.state.tests.slice(0,this.state.index),
-				...this.state.tests.slice(this.state.index+1)
-			]
-			this.setState({ tests: data,index: -1 })
-			fetch(`/api/tests/${id}`, { method: 'DELETE' })
+			fetch(`/api/tests/${id}`, { 
+				method: 'DELETE',
+		    	headers: { "Content-Type": "application/json" },
+		    	body: JSON.stringify({ username, password }),
+		    })
 			.then(res => res.json()).then((res) => {
-				if(!res.success) this.setState({ error: res.error});
-				else console.log('Deleted!');
+				if(!res.success) { 
+					this.setState({ error: res.error})
+					alert(res.error);
+				}
+				else {
+					let data = [
+						...this.state.tests.slice(0,this.state.index),
+						...this.state.tests.slice(this.state.index+1)
+					]
+					this.setState({ tests: data,index: -1 })
+					alert('Test successfully deleted!')
+				};
 			})
 		}
 	}
@@ -114,8 +127,18 @@ class TestDashboard extends Component {
 			})
 	}
 
-	handleChange(value) {
-		this.setState({ index: value })
+	handleListChange(value) {
+		this.setState({ index: value})
+	}
+
+	handleInputChange(event) {
+		let type = event.target.name;
+		let text = event.target.value;
+
+		if(type === 'username')
+			this.setState({ username: text });
+		else if(type === 'password')
+			this.setState({ password: text });
 	}
 
 	handleClick(event) {
@@ -142,10 +165,16 @@ class TestDashboard extends Component {
 
 		return(
 			<div className='dashboard'>
-				<Link to="/test-creator"> <button>Create New Test</button> </Link>
+			Login:
+            <p>
+              Username:<input name='username' type='text' value={this.state.username}  onChange={this.handleInputChange}/>
+              Password:<input name='password' type='password' value={this.state.password}  onChange={this.handleInputChange}/>
+            </p>
 					{/*<button type='button'>Create New Test</button>*/}
+						<hr/>
 						<div className='testlist'>
 							<h1>Tests:</h1>
+							<Link to="/test-creator"> <button>Create New Test</button> </Link>
 							{testList}
 							{/*
 							<RadioGroup name='test' selectedValue={this.state.selectedValue} onChange={this.handleChange}>

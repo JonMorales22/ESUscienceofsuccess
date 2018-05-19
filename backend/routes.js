@@ -6,6 +6,11 @@ import Subject from './models/subject';
 import Response from './models/response';
 import passport from './passport-config';
 
+/*
+  TODO:
+    -add forms to test-creator and test-dashboard for user authentication,
+    -add authentication to delete test route
+*/
 var express = require('express');
 var router = express.Router();
 //var passport = require('passport');
@@ -14,13 +19,37 @@ router.get('/', function(req, res){
   res.render('index')
 });
 
+// function checkAuthentication(req, res, next) {
+//   if(req.user) {
+//     next();
+//   }
+//   else {
+//     res.json({ success:false, error: 'user not authenticated!'});
+//   }
+// }
+
+
 function checkAuthentication(req, res, next) {
-  if(req.user) {
-    next();
-  }
-  else {
-    res.json({ success:false, error: 'user not authenticated!'});
-  }
+  const {username, password } = req.body;
+  
+  console.log("in checkauth");
+  console.log("\tUsername:" + username);
+  console.log("\tpassword:" + password);
+
+  passport.authenticate('local', function(error, user, info) {
+    if(error) { return res.json({ success: false, error: error}); }
+    if(!user) { 
+      return res.json({ success: false, error: "Incorrect username or password!"}); 
+    }
+    req.logIn(user, function(error) {
+      if(error) { 
+        console.log(error);
+        return res.json({ success: false, error: error });
+       }
+       console.log("User:" + user);
+       next();
+    });
+  })(req, res, next);
 }
 
 /**************** LOGIN ROUTES API ************************/
@@ -44,27 +73,13 @@ router.post('/register', (req,res) => {
   });
 })
 
-router.get('/checkauth', checkAuthentication,(req,res, next) => {
-  return res.json({ success: true });
-})
+// router.get('/checkauth', checkAuthentication,(req,res, next) => {
+//   return res.json({ success: true });
+// })
 
-router.post('/login', function(req, res) {
-  const {username, password } = req.body;
-  passport.authenticate('local', function(error, user, info) {
-    if(error) { return res.json({ success: false, error: error}); }
-    if(!user) { 
-      return res.json({ success: false, error: "Incorrect username or password!"}); 
-    }
-    req.logIn(user, function(error) {
-      if(error) { 
-        console.log(error);
-        return res.json({ success: false, error: error });
-       }
-       console.log("User:" + user);
-      return res.json({ success: true });
-    });
-  })(req, res);
-});
+// router.post('/login', function(req, res) {
+
+// });
 
 // router.post('/login', 
 //   passport.authenticate('local', {failureRedirect: 'login'}),

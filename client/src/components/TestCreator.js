@@ -26,6 +26,8 @@ class TestCreator extends Component {
     let questsArr = this.initializeData(20, 'question')
     let trialsArr = this.initializeData(5, 'trial');
     this.state = {
+      username: '',
+      password: '',
       name: '',
       numTrials: 5, //hardcoded at 5 for right now, later we'll figure out how to make this dynamic
       numQuest: 4,  //hardcoded at 4 for right now, later we'll figure out how to make this dynamic
@@ -37,7 +39,7 @@ class TestCreator extends Component {
     }
 
     //binding the events to the object
-    this.changeTestName = this.changeTestName.bind(this)
+    //this.changeTestName = this.changeTestName.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
     this.handleInputChange = this.handleInputChange.bind(this)
   }
@@ -133,9 +135,9 @@ class TestCreator extends Component {
   //   return(<Sidebar numbers={numArr} numQuest={numQuest} />)
   // }
 
-  changeTestName(event) {
-    this.setState({name: event.target.value})
-  }
+  // handleInputChange(event) {
+  //   this.setState({name: event.target.value})
+  // }
   
   /*
     !!!!!!! NOTE: I might be manipulating state in a dangerous manner, may run into problems later !!!!
@@ -148,12 +150,22 @@ class TestCreator extends Component {
       event - the event attached to the form that triggered this method 
     returns: nothing?
   */
+
   handleInputChange(index, event) {
     let type = event.target.name
     let text = event.target.value
-    let stateCopy = Object.assign({}, this.state)
+    let stateCopy = Object.assign({}, this.state);
 
-    if(type==='trial') {
+    if(type === 'test'){
+      this.setState({ name: text});
+    }
+    else if(type === 'username') {
+      this.setState({ username: text});
+    }
+    else if(type === 'password'){
+      this.setState({ password: text});
+    }
+    else if(type==='trial') {
       //manipulating state in this way might be bad, we'll find out later
       stateCopy.trials[index] = text;
       this.setState(stateCopy)
@@ -172,7 +184,7 @@ class TestCreator extends Component {
   */
   handleSubmit(event) {
     event.preventDefault();
-    const { name, trials, questions } = this.state; 
+    const { username, password, name, trials, questions } = this.state; 
     if(!name || !trials || !questions) {
       console.log("Must input a test name and fill out all trials and questions!")
       return;
@@ -180,7 +192,7 @@ class TestCreator extends Component {
     fetch('/api/tests', {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, trials, questions }),
+      body: JSON.stringify({ name, trials, questions, username, password }),
     })
     // .then(res => res.json(){
     //   console.log(res);
@@ -189,7 +201,11 @@ class TestCreator extends Component {
     //test 1
     .then(res => res.json()).then((res) => {
       console.log(res);
-      this.setState({submit: true})
+      if(res.success === true)
+        this.setState({submit: true})
+      else {
+        alert(res.error);
+      }
     })
 
 
@@ -235,8 +251,16 @@ class TestCreator extends Component {
     let forms = this.renderForms();
     return (
       <div className="test-creator">
+            <h3>Login:</h3>
+            <p>
+              Username:<input name='username' type='text' value={this.state.username}  onChange={this.handleInputChange.bind(this, null)}/>
+               Password:<input name='password' type='password' value={this.state.password}  onChange={this.handleInputChange.bind(this, null)}/>
+            </p>
+            <hr />
+
+            <h3>Test Data</h3>
           	Test Name:
-            <input type='text' value={this.state.name}  onChange={this.changeTestName}/>
+            <input name='test' type='text' value={this.state.name}  onChange={this.handleInputChange.bind(this, null)}/>
             {/* <input type='text' value={this.state.testName}  onChange={this.changeTestName} /> */}
             Number of Trials:
             {/* Setting these 2 forms to read only for now, later I'll figure out how to create the number of trials and questions based on user input*/}
