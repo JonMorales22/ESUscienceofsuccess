@@ -1,0 +1,17 @@
+{
+  "name": "google-speech-test",
+  "version": "0.0.0",
+  "description": "A test of the google speech to text api",
+  "main": "index.js",
+  "dependencies": {
+    "@google-cloud/speech": "^1.5.0",
+    "shelljs": "^0.8.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jonathan Morales",
+  "license": "ISC"
+}

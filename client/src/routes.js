@@ -6,8 +6,9 @@ import TestDashboard from './components/TestDashboard';
 //import TestViewer from './components/TestViewer';
 import TestTaker from './components/TestTaker';
 import DiscloseAgreement from './components/DiscloseAgreement';
-import DemographicSurvey from './components/DemographicSurvey'
-
+import DemographicSurvey from './components/DemographicSurvey';
+import Login from './components/Login'
+import NotFound from './components/NotFound'
 
 const Routes = () => (
 	<div className='App'>
@@ -17,6 +18,8 @@ const Routes = () => (
 			<Route exact path='/test-creator' component={TestCreator} />
 			<Route exact path='/test-taker' component={TestTaker} />
 			<Route exact path='/demographic-survey' component={DemographicSurvey} />
+			<Route exact path='/login' component={Login} />
+			<Route component={NotFound} />
 		</Switch>
 	</div>
 );

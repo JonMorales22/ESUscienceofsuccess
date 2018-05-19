@@ -1,16 +1,74 @@
 //server/routes.js
 import bodyParser from 'body-parser';
+import User from './models/user';
 import Test from './models/test';
 import Subject from './models/subject';
 import Response from './models/response';
+import passport from './passport-config';
 
 var express = require('express');
 var router = express.Router();
+//var passport = require('passport');
 
 router.get('/', function(req, res){
   res.render('index')
 });
 
+function checkAuthentication(req, res, next) {
+  if(req.user) {
+    next();
+  }
+  else {
+    res.json({ success:false, error: 'user not authenticated!'});
+  }
+}
+/**************** LOGIN ROUTES API ************************/
+// router.post('/login', (req,res) => {
+//   let user = User.findOne({});
+//   let data = user.validatePassword("@esu2018");
+//   return res.json({ success: true, data: data});
+// })
+
+//saves a new user in db
+passport.initialize();
+router.post('/register', (req,res) => {
+  const user = new User();
+  const {username, password} = req.body;
+  if(!username || !password) return ({ success:false, error: 'Need to provide both username and password!' });
+  user.username = username;
+  user.savePassword(password);
+  user.save(error => {
+    if (error) return res.json({ success: false, error: error });
+    return res.json({ success: true });
+  });
+})
+
+router.get('/checkauth', checkAuthentication,(req,res, next) => {
+  return res.json({ success: true });
+})
+
+router.post('/login', 
+  passport.authenticate('local', {failureRedirect: 'login'}),
+  (req, res) => {
+    if(!req.user) return res.json({ succes: false, error: "Authentication failed." });
+    return res.json({ success: true });
+  });
+
+// router.post('/login', 
+//   passport.authenticate('local', {failureRedirect: 'login'}),
+//   function(req, res) {
+//     return res.json({success: true});
+//   });
+
+router.get('/users', (req,res) => {
+  User.find((error, users) => {
+    if (error) return res.json({ success: false, error: error });
+    return res.json({ success: true, users: users });
+  });
+})
+
+
+/**********************************************************/
 
 /**************** TEST ROUTES API ************************/
 
@@ -29,13 +87,16 @@ router.get('/tests/:testId', (req, res) => {
     return res.json({ success: false, error: 'No test id provided!'});
   }
   Test.find({ _id: testId}, (error, test) => {
-    if(error) return res.json({ success: false, error });
-    return res.json({ success: true, test})
+    if(error) 
+      return res.json({ success: false, error });
+    else{
+      return res.json({ success: true, test})
+    }
   });
 }) 
 
-//adds a new test to the database
-router.post('/tests', (req, res) => {
+//saves a new test to the database
+router.post('/tests', checkAuthentication, (req, res, next) => {
   const test = new Test();
   // body parser lets us use the req.body
   const { name, trials, questions } = req.body;
@@ -71,7 +132,7 @@ router.post('/tests', (req, res) => {
 
 // When a researcher deletes a test, api has to ensure that all corresponding 
 // Subjects and Responses gets deleted as well!!!!!
-router.delete('/tests/:testId', (req, res) => {
+router.delete('/tests/:testId', checkAuthentication, (req, res, next) => {
   const { testId } = req.params;
   if(!testId) {
     return res.json({ success: false, error: 'No test id provided!'});
