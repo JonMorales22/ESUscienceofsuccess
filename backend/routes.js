@@ -22,6 +22,7 @@ function checkAuthentication(req, res, next) {
     res.json({ success:false, error: 'user not authenticated!'});
   }
 }
+
 /**************** LOGIN ROUTES API ************************/
 // router.post('/login', (req,res) => {
 //   let user = User.findOne({});
@@ -47,12 +48,23 @@ router.get('/checkauth', checkAuthentication,(req,res, next) => {
   return res.json({ success: true });
 })
 
-router.post('/login', 
-  passport.authenticate('local', {failureRedirect: 'login'}),
-  (req, res) => {
-    if(!req.user) return res.json({ succes: false, error: "Authentication failed." });
-    return res.json({ success: true });
-  });
+router.post('/login', function(req, res) {
+  const {username, password } = req.body;
+  passport.authenticate('local', function(error, user, info) {
+    if(error) { return res.json({ success: false, error: error}); }
+    if(!user) { 
+      return res.json({ success: false, error: "Incorrect username or password!"}); 
+    }
+    req.logIn(user, function(error) {
+      if(error) { 
+        console.log(error);
+        return res.json({ success: false, error: error });
+       }
+       console.log("User:" + user);
+      return res.json({ success: true });
+    });
+  })(req, res);
+});
 
 // router.post('/login', 
 //   passport.authenticate('local', {failureRedirect: 'login'}),

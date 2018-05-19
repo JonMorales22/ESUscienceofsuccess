@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
+import Modal from 'react-modal';
 import { observer } from "mobx-react";
 import 'whatwg-fetch';
-
+import { Redirect } from 'react-router-dom'
 import DevTools from "mobx-react-devtools";
 
 class Login extends Component {
@@ -25,15 +26,43 @@ class Login extends Component {
 			this.setState({ password: value });
 	}
 
-	validateForm() {
-
+	validateForm(username, password) {
+		if(this.state.username.length > 0 && this.state.password.length > 0){
+			//console.log('Form validated!');
+			return true;
+		}
+		else {
+			//console.log('Form invalid!');
+			return false; 
+		}
 	}
 
-	handleSubmit() {
-
+	handleSubmit(event) {
+		event.preventDefault();
+		if(this.validateForm()) {
+			const { username, password } = this.state;
+			console.log("username: " + username);
+			console.log("password: " + password);
+			fetch('/api/login', {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ username, password })
+			})
+			.then(res => res.json()).then((res) => {
+				if(res.success === true ) {
+					this.setState({ submit: true });
+				}
+				else if(res.success === false) {
+					alert(res.error);
+				}
+			})
+		}
 	}
 
 	render() {
+		if(this.state.submit === true) {
+			return <Redirect to='/dashboard' />
+		}
 		return(
 			<div className='login'>
 				<h1>Researchly Login:</h1>
