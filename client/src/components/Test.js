@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
 import Modal from 'react-modal';
+import { observer } from "mobx-react";
+import DevTools from "mobx-react-devtools";
+
 import Question from './Question';
 import AudioRecorder from './audio-recorder';
-import 'whatwg-fetch';
+import DemographicSurvey from './DemographicSurvey';
 
-import { observer } from "mobx-react";
 import ResponseStore from '../stores/ResponseStore.js';
-import DevTools from "mobx-react-devtools";
+import UserStore from '../stores/UserStore';
+
+import 'whatwg-fetch';
 
 const fs = require('fs');
 
@@ -45,6 +49,9 @@ const fs = require('fs');
 
 let responseStore = new ResponseStore(20);
 
+//FOR TESTING ONLY REMOVE LATER
+//UserStore.setTestId('5af5c709ca254a0704f3bef2');
+
 const customStyles = {
   content : {
   	textAlign			  : 'center',
@@ -63,8 +70,9 @@ class TestTaker extends Component {
 	constructor() {
 		super();
 		this.state = ({
-			test_id: '5af5c709ca254a0704f3bef2',
+			test_id: '',
 			test: null,
+			testname: null,
 			trials: null,
 			questions: null,
 			questionsIndex: 0,
@@ -84,16 +92,17 @@ class TestTaker extends Component {
 
 	//
 	loadTest = () => {
-		let test_id = this.state.test_id;
+		let test_id = UserStore.testId;
 		fetch(`/api/tests/${test_id}`, { method: 'GET' })
 		.then(data => data.json())
 		.then((res) => {
 			if(!res.success) this.setState({ error: res.error});
 			else {
+				let testname = res.test[0].name;
 				let trials = res.test[0].trials;
 				let questions = res.test[0].questions;
 				let questionsPerTrial = Math.floor(questions.length / trials.length);
-				this.setState({ test: res.test[0], trials: trials, questions: questions, questionsPerTrial: questionsPerTrial })
+				this.setState({ test: res.test[0],  testname: testname, trials: trials, questions: questions, questionsPerTrial: questionsPerTrial })
 				console.log('Success!');
 			} 
 		})
@@ -156,15 +165,15 @@ class TestTaker extends Component {
 				responseStore.setSkip();
 			}
 			else if( response.hasResponse || (!response.hasResponse && response.canSkip)) {
-				this.saveResponse();
-				// if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
-				// 	this.incrementTrialsIndex();
-				// 	this.openModal();
-				// }
-				// if(this.state.questionsIndex < this.state.questions.length-1) {
-				// 	responseStore.incrementIndex();
-				// 	this.incrementIndex();
-				// }
+				//this.saveResponse();
+				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
+					this.incrementTrialsIndex();
+					this.openModal();
+				}
+				if(this.state.questionsIndex < this.state.questions.length-1) {
+					responseStore.incrementIndex();
+					this.incrementIndex();
+				}
 			}
 		}
 	}
@@ -186,8 +195,6 @@ class TestTaker extends Component {
 
 
 	render() {
-		//let index = responseStore.index;
-		//let response = responseStore.responses[index];
 		if(this.state.trials && this.state.questions && !this.state.showStartDialogue) {
 			return(
 				<div className='test-taker'>
@@ -199,8 +206,8 @@ class TestTaker extends Component {
 				          style={customStyles}
 				          contentLabel="Example Modal"
 				        >
-
-				          <h3>Scenario {this.state.trialsIndex+1}:</h3>
+				          <h2>{this.state.test.name}</h2>
+				          <b>Scenario {this.state.trialsIndex+1}:</b>
 				          <div>
 				          	The following questions all have to deal with Scenario {this.state.trialsIndex+1}, which is printed at the top. 
 				          	<p>Please read the scenario carefully and answer the questions that follow.</p>
@@ -225,7 +232,7 @@ class TestTaker extends Component {
 		}
 		else {
 			return (
-				<p>There's nothing here!</p>
+				<p>Sorry! We seem to have lost that information...</p>
 			)
 		}
 	}

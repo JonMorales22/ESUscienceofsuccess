@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import {RadioGroup, Radio} from 'react-radio-group'
-import { Link } from 'react-router-dom'
+import { Redirect, Link } from 'react-router-dom'
+import { observer } from "mobx-react";
+import DevTools from "mobx-react-devtools";
+
+import UserStore from '../stores/UserStore';
 import 'whatwg-fetch';
-//import TestViewer from './TestViewer'
 
 class TestDashboard extends Component {
 	constructor() {
@@ -13,7 +16,8 @@ class TestDashboard extends Component {
 			password: '',
 			view: false,
 			error: null,
-			index: -1
+			index: -1,
+			submit: false,
 		}
 		this.handleClick = this.handleClick.bind(this);
 		this.handleListChange = this.handleListChange.bind(this);
@@ -152,6 +156,11 @@ class TestDashboard extends Component {
 		else if(type === 'export') {
 			console.log('export');
 		}
+		else if(type === 'take-test') {
+			this.setState({ submit: true });
+			UserStore.setTestId(this.state.tests[this.state.index]._id);
+			console.log("Test Id:" + UserStore.testId);
+		}
 	}
 
 	render() {
@@ -163,36 +172,52 @@ class TestDashboard extends Component {
 		else
 			test = [];
 
-		return(
-			<div className='dashboard'>
-			Login:
-            <p>
-              Username:<input name='username' type='text' value={this.state.username}  onChange={this.handleInputChange}/>
-              Password:<input name='password' type='password' value={this.state.password}  onChange={this.handleInputChange}/>
-            </p>
-					{/*<button type='button'>Create New Test</button>*/}
-						<hr/>
-						<div className='testlist'>
-							<h1>Tests:</h1>
-							<Link to="/test-creator"> <button>Create New Test</button> </Link>
-							{testList}
-							{/*
-							<RadioGroup name='test' selectedValue={this.state.selectedValue} onChange={this.handleChange}>
-								<Radio value='test1'/>Test1<br/>
-								<Radio value='test2'/>Test2<br/>
-							</RadioGroup>
-							*/}
-						</div>
-						<div className = 'btn-holder'>
-							<button name='view' onClick={this.handleClick}> View </button>
-							<button name='export' onClick={this.handleClick}> Export </button>
-							<button name='delete' onClick={this.handleClick}> Delete </button>
-						</div>
-						<div className = 'test-holder'>
-							{test}
-						</div>
-			</div>
-		)
+		if(this.state.submit === true){
+			return <Redirect to='/demographic-survey' />
+		}
+		else if(UserStore.isLoggedIn) {
+			return(
+				<div className='dashboard'>
+				<DevTools />
+				Login:
+	            <p>
+	              Username:<input name='username' type='text' value={this.state.username}  onChange={this.handleInputChange}/>
+	              Password:<input name='password' type='password' value={this.state.password}  onChange={this.handleInputChange}/>
+	            </p>
+							<hr/>
+							<div className='testlist'>
+								<h1>Tests:</h1>
+								<Link to="/test-creator"> <button>Create New Test</button> </Link>
+								{testList}
+							</div>
+							<div className = 'btn-holder'>
+								<button name='view' onClick={this.handleClick}> View </button>
+								<button name='export' onClick={this.handleClick}> Export </button>
+								<button name='delete' onClick={this.handleClick}> Delete </button>
+								<button name='take-test' onClick={this.handleClick}> Take Test </button>
+							</div>
+							<div className = 'test-holder'>
+								{test}
+							</div>
+				</div>
+			)
+		}
+		else{
+			return(
+				<div className='dashboard'>
+				<DevTools />
+							<hr/>
+							<div className='testlist'>
+								<h1>Tests:</h1>
+								{testList}
+							</div>
+							<div className = 'btn-holder'>
+								<button name='take-test' onClick={this.handleClick}> Take Test </button>
+							</div>
+				</div>
+			)
+		
+		}
 	}
 }
 

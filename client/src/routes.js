@@ -4,7 +4,7 @@ import { Route, Switch } from 'react-router-dom';
 import TestCreator from './components/TestCreator';
 import TestDashboard from './components/TestDashboard';
 //import TestViewer from './components/TestViewer';
-import TestTaker from './components/TestTaker';
+import Test from './components/Test';
 import DiscloseAgreement from './components/DiscloseAgreement';
 import DemographicSurvey from './components/DemographicSurvey';
 import Login from './components/Login'
@@ -16,7 +16,7 @@ const Routes = () => (
 			<Route exact path='/' component={DiscloseAgreement} />
 			<Route exact path='/dashboard' component={TestDashboard} />
 			<Route exact path='/test-creator' component={TestCreator} />
-			<Route exact path='/test-taker' component={TestTaker} />
+			<Route exact path='/test' component={Test} />
 			<Route exact path='/demographic-survey' component={DemographicSurvey} />
 			<Route exact path='/login' component={Login} />
 			<Route component={NotFound} />

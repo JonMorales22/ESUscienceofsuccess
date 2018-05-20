@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom'
+import { observer } from "mobx-react";
 
+import UserStore from '../stores/UserStore';
+
+@observer
 class DemographicSurvey extends Component {
 	constructor(props) {
 		super(props);
@@ -28,7 +32,8 @@ class DemographicSurvey extends Component {
 			body: JSON.stringify({ age, gender, ethnicity, year }),
 		})
 		.then(res => res.json()).then((res) => {
-			console.log(res);
+			UserStore.setUserId(res.subjectId)
+			console.log("TestStore.userId: " + UserStore.userId);
 			this.setState({ submit: true});
 		});
 	}
@@ -62,12 +67,14 @@ class DemographicSurvey extends Component {
 	handleSubmit(event) {
 		event.preventDefault();
 		this.saveSubject();
+		UserStore.setAnsweredSurvey();
 	}
 
 	render () {
 		let ageForm = this.renderAgeForm();
-		if(this.state.submit === true) 
-			return <Redirect to='/test-taker'/>
+		if(this.state.submit){
+			return <Redirect to='/test'/>
+		}
 		return (
 			<form onSubmit={this.handleSubmit}>
 				<div className='demographic-survey'>

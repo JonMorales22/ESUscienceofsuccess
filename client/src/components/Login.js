@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import Modal from 'react-modal';
 import { observer } from "mobx-react";
-import 'whatwg-fetch';
 import { Redirect } from 'react-router-dom'
-import DevTools from "mobx-react-devtools";
 
+import UserStore from "../stores/UserStore";
+import 'whatwg-fetch';
+
+@observer
 class Login extends Component {
 	constructor() {
 		super();
@@ -40,6 +42,7 @@ class Login extends Component {
 	handleSubmit(event) {
 		event.preventDefault();
 		if(this.validateForm()) {
+			console.log(UserStore.isLoggedIn)
 			const { username, password } = this.state;
 			console.log("username: " + username);
 			console.log("password: " + password);
@@ -50,7 +53,8 @@ class Login extends Component {
 			})
 			.then(res => res.json()).then((res) => {
 				if(res.success === true ) {
-					this.setState({ submit: true });
+					UserStore.logIn();
+					this.setState({ submit: true })
 				}
 				else if(res.success === false) {
 					alert(res.error);

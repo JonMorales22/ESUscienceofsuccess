@@ -81,11 +81,11 @@ router.post('/register', (req,res) => {
 
 // });
 
-// router.post('/login', 
-//   passport.authenticate('local', {failureRedirect: 'login'}),
-//   function(req, res) {
-//     return res.json({success: true});
-//   });
+router.post('/login', 
+  passport.authenticate('local', {failureRedirect: 'login'}),
+  function(req, res) {
+    return res.json({success: true});
+  });
 
 router.get('/users', (req,res) => {
   User.find((error, users) => {
@@ -179,6 +179,7 @@ router.get('/subjects', (req, res) => {
   });
 });
 
+//saves subject to database
 router.post('/subjects', (req, res) => {
 	const subject = new Subject();
 	const { age, gender, year, ethnicity } = req.body;
@@ -210,9 +211,9 @@ router.post('/subjects', (req, res) => {
   subject.gender = gender;
   subject.year = year;
   subject.ethnicity = ethnicity;
-  subject.save(error => {
+  subject.save((error, subject) => {
     if(error) return res.json({ success: false, error: error});
-    return res.json({ success: true });
+    return res.json({ success: true, subjectId: subject._id });
   });
 });
 /************************************************************/
