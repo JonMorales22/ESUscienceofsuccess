@@ -3,11 +3,23 @@ import { Redirect } from 'react-router-dom'
 import { observer } from "mobx-react";
 
 import UserStore from '../stores/UserStore';
+/*
+	Demographic Survey:
+		component used to gather the demographic info from our Subject. This is the 1st part of the Test.
+		All data is gathered from drop down lists. I figured this was the easiest and most foolproof way of collecting this data.
+		Unfortunately I (at this point) do not know how to make test not render the 1st choice from drop down, maybe I'll set them all
+		to the 'prefer not to answer' selection...
+	Params:
+		none
+	Stores:
+		UserStore
+*/
 
 @observer
 class DemographicSurvey extends Component {
 	constructor(props) {
 		super(props);
+		//unfortunately I can't figure out how to make the default values not show the top choice in the drop down list
 		this.state = ({
 			age: 18,
 			gender: 'male',
@@ -20,31 +32,35 @@ class DemographicSurvey extends Component {
 		this.handleChange = this.handleChange.bind(this);
 	}
 
+	//saves our demographic info to the DB using a POST request. 
+	//Receives the subject id in the response body, which is saved in UserStore
 	saveSubject() {
 		const {age, gender, ethnicity, year} = this.state;
+		const testId = UserStore.testId;
 		if(!age || !gender || !ethnicity || !year) {
-			console.log("Must input age, gender, ethnicity, and year!");
+			alert("Must input age, gender, ethnicity, and year!");
 			return;
+		}
+		else if(!testId) {
+			alert("Oops! Something went wrong, please return to dashboard and try again.");
 		}
 		fetch('api/subjects', {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ age, gender, ethnicity, year }),
+			body: JSON.stringify({ age, gender, ethnicity, year, testId }),
 		})
+		//subject's id should be in the response body, which is saved in UserStore.
 		.then(res => res.json()).then((res) => {
-			UserStore.setUserId(res.subjectId)
-			console.log("TestStore.userId: " + UserStore.userId);
-			this.setState({ submit: true});
+			if(res.success === true ) {
+				UserStore.setAnsweredSurvey();
+				UserStore.setUserId(res.subjectId)
+				console.log("TestStore.userId: " + UserStore.userId);
+				this.setState({ submit: true});
+			}
+			else if (res.success === false) {
+				alert("Oops! Something went wrong, please return to dashboard and try again.");
+			}
 		});
-	}
-
-	renderAgeForm() {
-		let options = [];
-
-		for(let i=0;i<100;i++) {
-			options.push(<option value={i}  key={i}> {i} </option>)
-		}
-		return (<select name='age' value={this.state.age} onChange={this.handleChange}> {options} </select>)
 	}
 
 	handleChange(event) {
@@ -67,7 +83,15 @@ class DemographicSurvey extends Component {
 	handleSubmit(event) {
 		event.preventDefault();
 		this.saveSubject();
-		UserStore.setAnsweredSurvey();
+	}
+
+	renderAgeForm() {
+		let options = [];
+
+		for(let i=0;i<100;i++) {
+			options.push(<option value={i}  key={i}> {i} </option>)
+		}
+		return (<select name='age' value={this.state.age} onChange={this.handleChange}> {options} </select>)
 	}
 
 	render () {

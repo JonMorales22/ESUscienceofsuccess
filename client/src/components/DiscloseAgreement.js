@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom'
 
+/*
+	Disclose Agreement
+		component used to let user know what's going down with this test app.
+		the way it works is pretty straightforward, not gonna add too many comments
+*/
+
 class DiscloseAgreement extends Component {
 	constructor() {
 		super();
@@ -44,7 +50,7 @@ class DiscloseAgreement extends Component {
 						<p>Disclaimer: These examinations will collect some data regarding your ethnicity, age, yadda yadda yadda</p>
 						<p>Please check the box if you agree to these terms.</p>
 							<input type='checkbox' name='agreement' value={this.state.accepted} onClick={this.handleClick}/> Agree
-							<button value='Continue' name='continue' disabled={!this.state.accepted} onClick={this.handleClick}> Continue </button>
+							<p><button value='Continue' name='continue' disabled={!this.state.accepted} onClick={this.handleClick}> Continue </button></p>
 					</div>
 
 				</div>	

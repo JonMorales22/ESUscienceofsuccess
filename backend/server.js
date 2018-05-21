@@ -40,54 +40,6 @@ app.use(passport.session());
 app.use(logger('dev'));
 
 
-/********************* ROUTES!!!!! ***************************/
-// now we can set the route path & initialize the API
-// router.get('/', (req, res) => {
-//   res.json({ message: 'Hello, World!' });
-// });
-
-// router.get('/tests', (req, res) => {
-//   Test.find((err, tests) => {
-//     if (err) return res.json({ success: false, error: err });
-//     return res.json({ success: true, data: tests });
-//   });
-// });
-
-// router.post('/tests', (req, res) => {
-//   const test = new Test();
-//   // body parser lets us use the req.body
-//   const { name, trials, questions } = req.body;
-//   if (!name) {
-//     // we should throw an error. we can do this check on the front end
-//     return res.json({
-//       success: false,
-//       error: 'You must provide a Test name!'
-//     });
-//   }
-//   else if (!trials) {
-//     // we should throw an error. we can do this check on the front end
-//     return res.json({
-//       success: false,
-//       error: 'You must provide an array of trials!'
-//     });
-//   }
-//   else if (!questions) {
-//     // we should throw an error. we can do this check on the front end
-//     return res.json({
-//       success: false,
-//       error: 'You must provide an array of questions!'
-//     });
-//   }
-//   test.name = name;
-//   test.trials = trials;
-//   test.questions = questions;
-//   test.save(err => {
-//     if (err) return res.json({ success: false, error: err });
-//     return res.json({ success: true });
-//   });
-// });
-/*************************************************************/
-
 // Use our router configuration when we call /api
 app.use('/api', router);
 

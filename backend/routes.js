@@ -123,7 +123,7 @@ router.get('/tests/:testId', (req, res) => {
 }) 
 
 //saves a new test to the database
-router.post('/tests', checkAuthentication, (req, res, next) => {
+router.post('/tests', (req, res, next) => {
   const test = new Test();
   // body parser lets us use the req.body
   const { name, trials, questions } = req.body;
@@ -159,7 +159,7 @@ router.post('/tests', checkAuthentication, (req, res, next) => {
 
 // When a researcher deletes a test, api has to ensure that all corresponding 
 // Subjects and Responses gets deleted as well!!!!!
-router.delete('/tests/:testId', checkAuthentication, (req, res, next) => {
+router.delete('/tests/:testId', (req, res, next) => {
   const { testId } = req.params;
   if(!testId) {
     return res.json({ success: false, error: 'No test id provided!'});
@@ -172,6 +172,7 @@ router.delete('/tests/:testId', checkAuthentication, (req, res, next) => {
 /************************************************************/
 
 /**************** SUBJECT ROUTES API ************************/
+//get all subjects info
 router.get('/subjects', (req, res) => {
   Subject.find((error, subjects) => {
     if (error) return res.json({ success: false, error: error });
@@ -182,7 +183,7 @@ router.get('/subjects', (req, res) => {
 //saves subject to database
 router.post('/subjects', (req, res) => {
 	const subject = new Subject();
-	const { age, gender, year, ethnicity } = req.body;
+	const { age, gender, year, ethnicity, testId } = req.body;
 	if(!age) {
 	    return res.json({
 	      success: false,
@@ -207,10 +208,18 @@ router.post('/subjects', (req, res) => {
 	      error: 'You must provide an ethnicity!'
 	    });
 	}
+  else if (!testId) {
+      res.status(400);
+      return res.json({
+        success: false,
+        error: 'You must provide a testId!'  
+      })
+  }
   subject.age = age;
   subject.gender = gender;
   subject.year = year;
   subject.ethnicity = ethnicity;
+  subject.testId = testId;
   subject.save((error, subject) => {
     if(error) return res.json({ success: false, error: error});
     return res.json({ success: true, subjectId: subject._id });
@@ -222,6 +231,7 @@ router.post('/subjects', (req, res) => {
 //testId: 5aecf96f5e5eea3e81980f70
 /**************** RESPONSE ROUTES API ************************/
 
+//get responses from DB
 router.get('/responses', (req, res) => {
   Response.find((error, responses) => {
     if(error) return res.json({ success: false, error: error });
@@ -229,6 +239,7 @@ router.get('/responses', (req, res) => {
   });
 });
 
+//save response
 router.post('/responses', (req, res) => {
   const response  = new Response();
   const { subjectId, testId, trialIndex, questionIndex, data } = req.body;
@@ -273,6 +284,7 @@ router.post('/responses', (req, res) => {
   });
 });
 
+//
 router.post('/audioresponse', (req, res) => {
   const response = new Response();
   const audiofile = req.body;

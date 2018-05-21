@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom'
 import 'whatwg-fetch';
-//import {Sidebar} from './Sidebar.js'
+import UserStore from '../stores/UserStore';
 
 /*  
   TestCreator:
@@ -12,7 +12,6 @@ import 'whatwg-fetch';
   Props: 
     Trials - number of trials per test
     Questions - number of questions per trial
-    possible a readonly state...?
  */
 
 class TestCreator extends Component {
@@ -20,14 +19,10 @@ class TestCreator extends Component {
     super(props)
     // these two arrays are used as 'placeholders' for our questions and trials states.
     // right now they are being filled with dummy info fo testing, but later they will be filled with empty strings
-    //let trialsArr = this.initializeData(this.props.numberOfTrials, 'trial');
-    //let questsArr = this.initializeData(this.props.numberOfQuestions*this.props.numberOfTrials, 'question')
     
     let questsArr = this.initializeData(20, 'question')
     let trialsArr = this.initializeData(5, 'trial');
     this.state = {
-      username: '',
-      password: '',
       name: '',
       numTrials: 5, //hardcoded at 5 for right now, later we'll figure out how to make this dynamic
       numQuest: 4,  //hardcoded at 4 for right now, later we'll figure out how to make this dynamic
@@ -178,13 +173,17 @@ class TestCreator extends Component {
   }
   /*
     handleSubmit
-      method that fires when the user submits the forms. This (hopefully) will send all out data to the backend.
-    params - event
+      method that fires when the user submits the forms. This will send all out data to the backend.
+    params - event=data sent when our submit event is fired
     returns: 
   */
   handleSubmit(event) {
     event.preventDefault();
-    const { username, password, name, trials, questions } = this.state; 
+    const { name, trials, questions } = this.state; 
+    //first make sure user is logged in and authorized to create a test
+    if(!UserStore.isLoggedIn)
+      return(alert("Test not saved. Please login to save a test."));
+    //makes sure all relevant data is filled in
     if(!name || !trials || !questions) {
       console.log("Must input a test name and fill out all trials and questions!")
       return;
@@ -192,13 +191,8 @@ class TestCreator extends Component {
     fetch('/api/tests', {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, trials, questions, username, password }),
+      body: JSON.stringify({ name, trials, questions }),
     })
-    // .then(res => res.json(){
-    //   console.log(res);
-    // })
-
-    //test 1
     .then(res => res.json()).then((res) => {
       console.log(res);
       if(res.success === true)
@@ -207,35 +201,6 @@ class TestCreator extends Component {
         alert(res.error);
       }
     })
-
-
-    //test 2
-    // .then((res) => {
-    //   if(!res.success) {
-    //     console.log('error in if statement!')
-    //     this.setState({ error: res.error.message || res.error });
-    // }
-    //   else {
-    //     console.log('we made it?')
-    //     let totalNumberOfQuestions = this.state.numberOfTrials * this.state.numberOfQuestions;
-    //     let trialsArr = this.initializeData(this.state.numberOfTrials, 'trial');
-    //     let questionsArr = this.initialzeData(totalNumberOfQuestions, 'questions');
-    //     this.setState({ testName: "", trials: trialsArr, questions: questionsArr, error: null });
-    //   }
-    // }).catch((reason) => {
-    //   console.log("Caught exception: " + reason);
-    // });
-
-
-    // let testData = this.state.trials
-    // let questData = this.state.questions
-    
-    //WAS ABOUT TO PUT IN METHODS TO BALIDATE TRIALS AND QUESTIONS ARRAY, BUT MAYBE ITS BETTER TO VALIDAE IN OUR SCHEMA!!!
-    console.log(name);
-    console.log(trials);
-    console.log(questions);
-    
-
   }
 
   /*
@@ -251,12 +216,6 @@ class TestCreator extends Component {
     let forms = this.renderForms();
     return (
       <div className="test-creator">
-            <h3>Login:</h3>
-            <p>
-              Username:<input name='username' type='text' value={this.state.username}  onChange={this.handleInputChange.bind(this, null)}/>
-               Password:<input name='password' type='password' value={this.state.password}  onChange={this.handleInputChange.bind(this, null)}/>
-            </p>
-            <hr />
 
             <h3>Test Data</h3>
           	Test Name:

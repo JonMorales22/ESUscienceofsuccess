@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+//404 component, rendered if a route isn't found
 class NotFound extends Component {
 	render() {
 		return(

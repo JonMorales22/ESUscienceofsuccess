@@ -6,6 +6,7 @@ const SubjectsSchema = new Schema({
 	gender: String,
 	year: String,
 	ethnicity: String,
+	testId: {type: Schema.Types.ObjectId, ref: 'Test'}
 }, { timestamps: true });
 
 export default mongoose.model('Subject', SubjectsSchema);

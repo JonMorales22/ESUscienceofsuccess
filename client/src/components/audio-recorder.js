@@ -17,14 +17,6 @@ export class AudioRecorder extends Component {
 	constructor(props) {
 		super(props);
 		this.state = (initialState);
-		// this.state = ({
-		// 	record: false,
-		// 	latency: -1,
-		// 	audiofile: {
-		// 		blob: null,
-		// 		blobURL: "test"
-		// 	}
-		// });
 		this.startRecording = this.startRecording.bind(this)
 		this.stopRecording = this.stopRecording.bind(this)
 		this.onStop = this.onStop.bind(this)

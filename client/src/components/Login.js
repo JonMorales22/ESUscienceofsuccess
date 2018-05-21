@@ -30,11 +30,9 @@ class Login extends Component {
 
 	validateForm(username, password) {
 		if(this.state.username.length > 0 && this.state.password.length > 0){
-			//console.log('Form validated!');
 			return true;
 		}
 		else {
-			//console.log('Form invalid!');
 			return false; 
 		}
 	}

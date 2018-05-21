@@ -12,46 +12,11 @@ import UserStore from '../stores/UserStore';
 
 import 'whatwg-fetch';
 
-const fs = require('fs');
 
-//for right now just going to implement a question store which will be simpler, later I can implement a full test store if necessary.
-// class TestStore {
-// 	@observable questions = [];
-// 	@observable trials = [];
-// 	@observable test;
-// 	@observable index;
-
-// 	@action.bound 
-// 	incrementIndex() {
-// 		let max = this.trials.length * this.questions.length;
-// 		if(this.index < this.trials.length-1)
-// 		{
-// 			this.index++;
-// 		}
-// 	}
-// }
-// class QuestionStore {
-// 	@observable questions = [];
-// 	@observable index = 0;
-
-// 	@action.bind
-// 	addQuestion(question) {
-// 		this.questions.push(question);
-// 	}
-
-// 	@action.bind
-// 	incrementIndex() {
-// 		if(this.index < this.questions.length-1)
-// 			this.index++
-// 	}
-
-// }
-
+//creates a response store
 let responseStore = new ResponseStore(20);
 
-//FOR TESTING ONLY REMOVE LATER
-//UserStore.setTestId('5af5c709ca254a0704f3bef2');
-
+//custom CSS used for our Modal,
 const customStyles = {
   content : {
   	textAlign			  : 'center',
@@ -64,7 +29,26 @@ const customStyles = {
   }
 };
 
-//test_id: 5af5c709ca254a0704f3bef2 <-- currently using this for debugging
+//test_id: 5af5c709ca254a0704f3bef2 <-- currently using this for debugging... UPDATE: probably not using it anymore LUL
+/*TODO
+	-if a test doesn't load from db, add a way for subject to try again or take them back to dashboard
+*/
+
+/*
+	TestTaker
+		component used to show questions and receive responses from subject. 
+		When component first renders, subject is shown a modal that shows them the Test Name, the current trial, and the current question.
+		this modal appears everytime the subject starts a new trial. I added this functionality so it was EXPLICITLY clear that subject started
+		a new trial so that they would be more likey to read the trial prompt
+
+		I also added functionality that allows a subject to skip a question... however I feel like that will probably be removed in the future.
+
+		Props:
+			none
+		Stores:
+			UserStore
+			ResponseStore
+*/
 @observer
 class TestTaker extends Component {
 	constructor() {
@@ -75,22 +59,23 @@ class TestTaker extends Component {
 			testname: null,
 			trials: null,
 			questions: null,
-			questionsIndex: 0,
-			trialsIndex: 0,
+			questionsIndex: 0, //index used to keep track of what question the Subject is currently answering
+			trialsIndex: 0, //index used to keep track of what trial the subject is currently on
 			questionsPerTrial: 0,
-			modalIsOpen: true,
+			modalIsOpen: true, //show modal which notifies the Subject what trial they are on
 		});
 		this.handleClick = this.handleClick.bind(this);
 		this.openModal = this.openModal.bind(this);
 		this.closeModal = this.closeModal.bind(this);
 	}
 
+	//loads our test from DB when component mounts
 	componentDidMount() {
 		this.loadTest();
-		//responseStore = new ResponseStore(20);
 	}
 
-	//
+	//loads test from and stores it in state... maybe it would be better to create Test Store and store test in the TestDashboard component
+	//that would be 1 less call to the database
 	loadTest = () => {
 		let test_id = UserStore.testId;
 		fetch(`/api/tests/${test_id}`, { method: 'GET' })
@@ -103,11 +88,11 @@ class TestTaker extends Component {
 				let questions = res.test[0].questions;
 				let questionsPerTrial = Math.floor(questions.length / trials.length);
 				this.setState({ test: res.test[0],  testname: testname, trials: trials, questions: questions, questionsPerTrial: questionsPerTrial })
-				console.log('Success!');
 			} 
 		})
 	}
 
+	//saves our AudioResponse data to DB
 	saveResponse = () => {
 		let index = responseStore.index;
 		let response = responseStore.responses[index];
@@ -133,20 +118,18 @@ class TestTaker extends Component {
 			});
 		});
 		reader.readAsDataURL(blob);
-
 	}
 
+	//
 	incrementTrialsIndex() {
 		this.setState(prevState => {
-			//console.log("trials length: " + this.state.trials.length);
 			if(this.state.trialsIndex < this.state.trials.length-1){
-				//console.log("trials index: " + this.state.trialsIndex);
 				return {trialsIndex: prevState.trialsIndex+1}
 			}
 		})	
 	}
 
-	incrementIndex(){
+	incrementQuestionsIndex(){
 		this.setState(prevState => {
 			if(this.state.questionsIndex < this.state.questions.length){
 				return {questionsIndex: prevState.questionsIndex+1}
@@ -156,33 +139,30 @@ class TestTaker extends Component {
 
 	handleClick(event) {
 		let type = event.target.name;
-		//let value = event.target.value;
 		if(type === 'next') {
+			//save two values from ResponseStore in placeholder variables, I think its more readable this way
 			let index = responseStore.index;
 			let response = responseStore.responses[index];
+
+			//checks response store to see if we have a response, or if the user can skip the question
 			if(!response.hasResponse && !response.canSkip) {
 				alert('Warning: You have not recorded a response! If you wish to skip the question, click the next button again.');
 				responseStore.setSkip();
 			}
-			else if( response.hasResponse || (!response.hasResponse && response.canSkip)) {
+			else if( response.hasResponse || response.canSkip) {
 				//this.saveResponse();
+				//if we are on question 0,4,8,12,16 then we show the modal
 				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
 					this.incrementTrialsIndex();
 					this.openModal();
 				}
 				if(this.state.questionsIndex < this.state.questions.length-1) {
 					responseStore.incrementIndex();
-					this.incrementIndex();
+					this.incrementQuestionsIndex();
 				}
 			}
 		}
 	}
-
-	// handleSubmit(event) {
-	// 	event.preventDefault();
-	// 	let type = event.target.name;
-	// 	let value = event.target.value;
-	// }
 
 	openModal() {
 		this.setState({modalIsOpen: true});
@@ -193,9 +173,13 @@ class TestTaker extends Component {
 		this.setState({modalIsOpen: false});
 	}
 
-
+	/*
+	  Render
+	  	first we check to make sure we actually have test data pulled from DB, if not we notify the Subject
+	  	NEED TO ADD A LINK THAT TAKES USER BACK TO DASHBOARD!!!!
+	*/
 	render() {
-		if(this.state.trials && this.state.questions && !this.state.showStartDialogue) {
+		if(this.state.trials && this.state.questions) {
 			return(
 				<div className='test-taker'>
 					<div>
