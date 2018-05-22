@@ -5,14 +5,19 @@ import Test from './models/test';
 import Subject from './models/subject';
 import Response from './models/response';
 import passport from './passport-config';
+import {dropboxtest} from './services/dropboxAPI/dropboxService.js'; 
+import {googlespeech} from './services/googleAPI/googleAPI.js';
+import {audioconverter} from './services/ffmpegAPI/audio-converter.js';
+//dropbox.saveTest();
 
-/*
-  TODO:
-    -add forms to test-creator and test-dashboard for user authentication,
-    -add authentication to delete test route
-*/
+var fs = require('fs');
 var express = require('express');
 var router = express.Router();
+//var dropboxService = require('/Users/jonathanmorales/documents/projects/MERN/researchly-ejected/backend/services/dropboxAPI');
+
+
+//var dropbox = require('');
+
 //var passport = require('passport');
 
 router.get('/', function(req, res){
@@ -27,6 +32,41 @@ router.get('/', function(req, res){
 //     res.json({ success:false, error: 'user not authenticated!'});
 //   }
 // }
+
+router.post('/audioresponse', (req, res) => {
+  const { subjectId, testId, trialsIndex , questionsIndex, audio } = req.body;
+  const response = new Response();
+
+  console.log("subjectId:" + subjectId);
+  console.log("testId:" + testId);
+  console.log("trialsIndex:" + trialsIndex);
+  console.log("questionsIndex:" + questionsIndex);
+
+  //!trialsIndex returns true when trialsIndex = 0, same for questionsIndex... therefore I used this ugly syntax 
+  if(!subjectId || !testId || !audio || trialsIndex === null || questionsIndex === null ) {
+    res.status(400);
+    return res.json({ success: false, error: 'Missing one or more of the following: subjectId, testId, trialIndex, questionIndex, audio.'})
+  } 
+
+  response.subjectId = subjectId;
+  response.testId = testId;
+  response.trialsIndex = trialsIndex;
+  response.questionsIndex = questionsIndex;
+
+  response.save(error => {
+    if(error) { 
+      res.status(502);
+      return res.json({ success: false, error: error});
+    }
+    else {
+      audioconverter.saveAudio(audio);
+      return res.json({ success: true });
+    }
+  });
+});
+
+
+
 
 
 function checkAuthentication(req, res, next) {
@@ -284,23 +324,8 @@ router.post('/responses', (req, res) => {
   });
 });
 
-//
-router.post('/audioresponse', (req, res) => {
-  const response = new Response();
-  const audiofile = req.body;
-  if(!audiofile) {
-      return res.json({
-        success: false,
-        error: 'no audiofile detected!'
-      });
-  }
-  response.blob = audiofile;
-  console.log(audiofile);
-  response.save(error => {
-    if(error) return res.json({ success: false, error: error});
-    return res.json({ success: true });
-  });
-});
+//USING THIS FOR TESTING
+
 
 /*************************************************************/
 

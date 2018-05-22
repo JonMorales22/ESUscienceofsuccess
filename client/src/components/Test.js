@@ -16,6 +16,10 @@ import 'whatwg-fetch';
 //creates a response store
 let responseStore = new ResponseStore(20);
 
+//FOR TESTING ONLY!!! REMOVE LATER!!
+UserStore.setTestId('5b01f2f88834e045a888ea4a');
+UserStore.setUserId('5b0309560928d21008a5d32f');
+
 //custom CSS used for our Modal,
 const customStyles = {
   content : {
@@ -29,7 +33,7 @@ const customStyles = {
   }
 };
 
-//test_id: 5af5c709ca254a0704f3bef2 <-- currently using this for debugging... UPDATE: probably not using it anymore LUL
+//test_id:5b01f2f88834e045a888ea4a <-- currently using this for debugging... UPDATE: probably not using it anymore LUL
 /*TODO
 	-if a test doesn't load from db, add a way for subject to try again or take them back to dashboard
 */
@@ -98,20 +102,25 @@ class TestTaker extends Component {
 		let response = responseStore.responses[index];
 		let audiofile = response.audiofile;
 		let blob = audiofile.blob;
-		let blobURL = audiofile.bloblURL
+		let blobURL = audiofile.blobURL;
+
+		let testId = UserStore.testId;
+		let subjectId = UserStore.userId;
+		let trialsIndex = this.state.trialsIndex;
+		let questionsIndex = this.state.questionsIndex;
+
 		if(!blob) {
 			console.log('audiofile doesn not exist!');
 			return;
 		}
-		//let foo = new Buffer(audiofile,'binary').toString("base64");
 		var reader = new FileReader();
 		reader.addEventListener('loadend', function() {
-			let base64 = reader.result;
+			let audio = reader.result;
 			//base64 = base64.substr(base64.indexOf(',')+1);
 			fetch('/api/audioresponse', {
 				method: 'POST',
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ base64 }),
+				body: JSON.stringify({ subjectId, testId, trialsIndex, questionsIndex, audio })
 			})
 			.then(res => res.json()).then((res) => {
 				console.log(res);
@@ -150,7 +159,7 @@ class TestTaker extends Component {
 				responseStore.setSkip();
 			}
 			else if( response.hasResponse || response.canSkip) {
-				//this.saveResponse();
+				this.saveResponse();
 				//if we are on question 0,4,8,12,16 then we show the modal
 				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
 					this.incrementTrialsIndex();

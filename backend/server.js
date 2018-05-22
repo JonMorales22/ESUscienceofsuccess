@@ -32,8 +32,8 @@ mongoose.connect('mongodb://localhost:27017/', {dbName: 'researchly-test'} ,(err
 
 
 // now we should configure the API to use bodyParser and look for JSON data in the request body
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(session({secret: 'poop', cookie: {maxAge: 60000 }}));
 app.use(passport.initialize());
 app.use(passport.session());

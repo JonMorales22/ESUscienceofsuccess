@@ -2,11 +2,11 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const ResponsesSchema = new Schema({
-	//subjectId: { type: Schema.Types.ObjectId, ref: 'Subject' },
-	//testId: { type: Schema.Types.ObjectId, ref: 'Test'},
-	//trialIndex: Number,
-	//questionIndex: Number,
-	blob: Buffer
+	subjectId: { type: Schema.Types.ObjectId, ref: 'Subject' },
+	testId: { type: Schema.Types.ObjectId, ref: 'Test'},
+	trialsIndex: Number,
+	questionsIndex: Number,
+	audio: String,
 	//data: { latency: Number, time: Number, text: String },
 });
 
