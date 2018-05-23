@@ -5,14 +5,14 @@ import Test from './models/test';
 import Subject from './models/subject';
 import Response from './models/response';
 import passport from './passport-config';
-import {dropboxtest} from './services/dropboxAPI/dropboxService.js'; 
-import {googlespeech} from './services/googleAPI/googleAPI.js';
-import {audioconverter} from './services/ffmpegAPI/audio-converter.js';
+import {handleAudioService} from './services/HandleAudioService.js';
+import {dropboxService} from './services/DropboxService.js';
 //dropbox.saveTest();
 
 var fs = require('fs');
 var express = require('express');
 var router = express.Router();
+
 //var dropboxService = require('/Users/jonathanmorales/documents/projects/MERN/researchly-ejected/backend/services/dropboxAPI');
 
 
@@ -59,7 +59,8 @@ router.post('/audioresponse', (req, res) => {
       return res.json({ success: false, error: error});
     }
     else {
-      audioconverter.saveAudio(audio);
+      //audioconverter.saveAudio(audio);
+      handleAudioService.handleAudio(audio);
       return res.json({ success: true });
     }
   });
@@ -191,10 +192,48 @@ router.post('/tests', (req, res, next) => {
   test.name = name;
   test.trials = trials;
   test.questions = questions;
-  test.save(error => {
-    if (error) return res.json({ success: false, error: error });
-    return res.json({ success: true });
+
+
+  /*this unwieldy statement does the following:
+    1. saves a test in the database
+    2. creates a corresponding folder in Dropbox
+
+    if an error occurs in the 2nd step, we have to ensure that the test is DELETED FROM THE DATABASE.
+    if test is saved in database but a corresponding folder wasn't created in Dropbox...
+    ERRORS WILL OCCUR AND APP WILL IMPLODE!!!
+  */
+  test.save((error) => {
+    if (error) {
+      console.log("Error: test name already exists in database! Rename test and try again.");
+      return res.json({ success: false, error: 'Error: test name already exists in database! Rename test and try again.' });
+    }
+    else {
+      console.log('Successfully saved test in database!');
+      //if test is saved, attempt to create a directory in dropbox
+      dropboxService.createFolder('/' + name)
+      .then(() => {
+        //if successfully saved directory in dropbox, returns true and everything is kosher 
+        console.log("Successfully saved test in database and created corresponding folder in dropbox! :)");
+        return res.json({ success: true });
+      })
+      .catch(error => {
+        console.log("Error creating folder in dropbox! Deleting test in database Please try again.");
+        /*if directroy couldn't be created in dropbox, attempts to delete newly created test from database.
+        we only get to this statement if the test was successfully created in the database.
+        However, if we create the test in the database but couldn't create a corresponding folder in dropbox... 
+        ERRORS WILL OCCUR AND APP WILL IMPLODE!!!
+       
+        So we have to ensure that if for some reason there was an error creating directory in dropbox, that we delete the test from the database!
+        */        
+        Test.remove({ name: name }, (error) => {
+          //if for some reason the app couldn't delete the test from database, notify user and HOPEFULLY THEY WILL TAKE CARE OF IT.... (I realize that this is really bad and the user probably won't delete the test, but I have no other options :'(... )
+          if(error) return res.json({ success: false, error: "Warning! Test was saved to database, but the app could not create corresponding folder in Dropbox! This can lead to errors and the app will implode! Please delete the test you just created from manually from the dashboard and try again!"})
+        });
+        return res.json({ success: false, error: 'Error creating folder in dropbox! Deleting test in database Please try again.' });
+      })
+    }
   });
+
 });
 
 // When a researcher deletes a test, api has to ensure that all corresponding 
@@ -205,7 +244,7 @@ router.delete('/tests/:testId', (req, res, next) => {
     return res.json({ success: false, error: 'No test id provided!'});
   }
   Test.remove({ _id: testId}, (error, test) => {
-    if(error) return res.json({ sucess: false, error });
+    if(error) return res.json({ sucess: false, error: error });
     return res.json({ success: true });
   });
 })

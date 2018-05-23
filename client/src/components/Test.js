@@ -17,7 +17,7 @@ import 'whatwg-fetch';
 let responseStore = new ResponseStore(20);
 
 //FOR DEBUGGING ONLY
-UserStore.setTestId('5b01f2f88834e045a888ea4a');
+UserStore.setTestId('5b05d99bd305b68e1847c16e');
 UserStore.setUserId('5b0406ea63112b5a43062a30');
 
 //custom CSS used for our Modal,

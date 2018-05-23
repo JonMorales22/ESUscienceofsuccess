@@ -9,7 +9,7 @@ function validateArray(arr) {
 }
 
 const TestsSchema = new Schema({
-  name: String,
+  name: { type: String, unique: true },
   trials: [{ type: Number, type: String}],
   questions: [{ type: Number, type: String}]
 }, { timestamps: true });
