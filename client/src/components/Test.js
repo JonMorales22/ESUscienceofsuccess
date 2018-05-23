@@ -16,9 +16,9 @@ import 'whatwg-fetch';
 //creates a response store
 let responseStore = new ResponseStore(20);
 
-//FOR TESTING ONLY!!! REMOVE LATER!!
+//FOR DEBUGGING ONLY
 UserStore.setTestId('5b01f2f88834e045a888ea4a');
-UserStore.setUserId('5b0309560928d21008a5d32f');
+UserStore.setUserId('5b0406ea63112b5a43062a30');
 
 //custom CSS used for our Modal,
 const customStyles = {
@@ -33,7 +33,8 @@ const customStyles = {
   }
 };
 
-//test_id:5b01f2f88834e045a888ea4a <-- currently using this for debugging... UPDATE: probably not using it anymore LUL
+//test_id: 5b01f2f88834e045a888ea4a <-- currently using this for debugging... UPDATE: probably not using it anymore LUL
+
 /*TODO
 	-if a test doesn't load from db, add a way for subject to try again or take them back to dashboard
 */
@@ -161,14 +162,14 @@ class TestTaker extends Component {
 			else if( response.hasResponse || response.canSkip) {
 				this.saveResponse();
 				//if we are on question 0,4,8,12,16 then we show the modal
-				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
-					this.incrementTrialsIndex();
-					this.openModal();
-				}
-				if(this.state.questionsIndex < this.state.questions.length-1) {
-					responseStore.incrementIndex();
-					this.incrementQuestionsIndex();
-				}
+				// if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
+				// 	this.incrementTrialsIndex();
+				// 	this.openModal();
+				// }
+				// if(this.state.questionsIndex < this.state.questions.length-1) {
+				// 	responseStore.incrementIndex();
+				// 	this.incrementQuestionsIndex();
+				// }
 			}
 		}
 	}

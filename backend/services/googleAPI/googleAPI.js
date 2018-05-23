@@ -8,7 +8,7 @@ export class googleSpeechService {
 	constructor(){}
 
 	analyzeSpeech(filename) {
-        console.log('in google speecha pi')
+        console.log('in googleapi -> analyze speech');
         //google stuff
         //const filename = 'outputMono.wav';
         const encoding = 'LINEAR16';
@@ -35,17 +35,10 @@ export class googleSpeechService {
           .recognize(request)
 		  .then(data => {
 		    const response = data[0];
-		    response.results.forEach(result => {
-		      console.log(`Transcription: ${result.alternatives[0].transcript}`);
-		      
-		      //google responds with an object that contains a lot of bs, I'm just pulling out what I need.
-		      //the object actually contains time stamps for ALL the words in the transcription, but I only need the time stamp
-		      //for the 1st word which is equal to the latency
-		      let seconds = result.alternatives[0].words[0].startTime.seconds;
-		      let nanos = result.alternatives[0].words[0].startTime.nanos / 100000000;
-		      console.log('Start Time in seconds: ' + seconds + '.' + nanos);
-
-		      });
+        const transcription = response.results
+          .map(result => result.alternatives[0].transcript)
+          .join('\n');
+        console.log(`Transcription: `, transcription);
 		  })
 		    .catch(err => {
 		        console.error('ERROR:', err);

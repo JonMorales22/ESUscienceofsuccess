@@ -1,4 +1,5 @@
 import {googlespeech} from '../googleAPI/googleAPI.js';
+import {dropboxtest} from '../dropboxAPI/dropboxService.js';
 
 var shell = require('shelljs');
 var atob = require('atob');
@@ -17,18 +18,20 @@ export class audioConverter {
 		var filename = './audio/audio.webm'
 		fs.writeFile(filename, audio, (err,res) => {
 			if(err) throw err;
-			else this.checkFiles('output.wav', 'outputMono.wav', this.convertAudio(filename));
+			else this.checkFiles('audio/output.wav', 'audio/outputMono.wav', this.convertAudio(filename));
 		})	
 	}
 
 	convertAudio(filename) {
-		shell.exec('./services/ffmpegAPI/./ffmpeg -i ./audio/audio.webm -vn output.wav -loglevel quiet', function(err) {
+		shell.exec('./services/ffmpegAPI/./ffmpeg -i ./audio/audio.webm -vn audio/output.wav -loglevel quiet', function(err) {
 			//console.log('in 1st convert');
 			if(err) throw err;
-      		shell.exec('./services/ffmpegAPI/./ffmpeg -i output.wav -ac 1 outputMono.wav -loglevel quiet', function(err) {
+      		shell.exec('./services/ffmpegAPI/./ffmpeg -i output.wav -ac 1 audio/outputMono.wav -loglevel quiet', function(err) {
       			//console.log('in 2nd convert');
       			if(err) throw err;
-      			googlespeech.analyzeSpeech('outputMono.wav');
+
+      			dropboxtest.saveAudio('outputMono.wav');
+      			//googlespeech.analyzeSpeech('outputMono.wav');
       		});
       	});
 	}
