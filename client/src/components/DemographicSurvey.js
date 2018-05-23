@@ -15,6 +15,8 @@ import UserStore from '../stores/UserStore';
 		UserStore
 */
 
+
+
 @observer
 class DemographicSurvey extends Component {
 	constructor(props) {
@@ -35,19 +37,23 @@ class DemographicSurvey extends Component {
 	//saves our demographic info to the DB using a POST request. 
 	//Receives the subject id in the response body, which is saved in UserStore
 	saveSubject() {
+
 		const {age, gender, ethnicity, year} = this.state;
+		
 		const testId = UserStore.testId;
+		const testName = UserStore.testName;
+
 		if(!age || !gender || !ethnicity || !year) {
 			alert("Must input age, gender, ethnicity, and year!");
 			return;
 		}
-		else if(!testId) {
-			alert("Oops! Something went wrong, please return to dashboard and try again.");
+		else if(!testId || !testName) {
+			alert("Oops! TestId or testName doesn't exist! Something went wrong, please return to dashboard and try again.");
 		}
 		fetch('api/subjects', {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ age, gender, ethnicity, year, testId }),
+			body: JSON.stringify({ age, gender, ethnicity, year, testId, testName }),
 		})
 		//subject's id should be in the response body, which is saved in UserStore.
 		.then(res => res.json()).then((res) => {
@@ -55,7 +61,7 @@ class DemographicSurvey extends Component {
 				UserStore.setAnsweredSurvey();
 				UserStore.setUserId(res.subjectId)
 				console.log("TestStore.userId: " + UserStore.userId);
-				this.setState({ submit: true});
+				//this.setState({ submit: true});
 			}
 			else if (res.success === false) {
 				alert("Oops! Something went wrong, please return to dashboard and try again.");

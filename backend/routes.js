@@ -210,10 +210,11 @@ router.post('/tests', (req, res, next) => {
     else {
       console.log('Successfully saved test in database!');
       //if test is saved, attempt to create a directory in dropbox
-      dropboxService.createFolder('/' + name)
+      var path = '/' + name;
+      dropboxService.createFolder(path)
       .then(() => {
         //if successfully saved directory in dropbox, returns true and everything is kosher 
-        console.log("Successfully saved test in database and created corresponding folder in dropbox! :)");
+        console.log("Successfully saved test in database and created corresponding folder in dropbox at following path:" + path);
         return res.json({ success: true });
       })
       .catch(error => {
@@ -230,23 +231,58 @@ router.post('/tests', (req, res, next) => {
           if(error) return res.json({ success: false, error: "Warning! Test was saved to database, but the app could not create corresponding folder in Dropbox! This can lead to errors and the app will implode! Please delete the test you just created from manually from the dashboard and try again!"})
         });
         return res.json({ success: false, error: 'Error creating folder in dropbox! Deleting test in database Please try again.' });
-      })
-    }
-  });
-
+      })//catch
+    } //else
+  });//test.save
 });
 
 // When a researcher deletes a test, api has to ensure that all corresponding 
 // Subjects and Responses gets deleted as well!!!!!
 router.delete('/tests/:testId', (req, res, next) => {
   const { testId } = req.params;
+  const { testName, trials, questions } = req.body;
+
+  console.log('testName: ' + testName)
+
   if(!testId) {
+    res.status(400);
     return res.json({ success: false, error: 'No test id provided!'});
   }
-  Test.remove({ _id: testId}, (error, test) => {
-    if(error) return res.json({ sucess: false, error: error });
-    return res.json({ success: true });
-  });
+  else if(! testName || !trials || !questions) {
+    res.status(400);
+    return res.json({ success: false, error: 'testName, trials, or questions missing from request!'});
+  }
+
+  //THIS IS GONNA GET WILD
+  Test.remove({ _id: testId}, error => {
+    if(error) {
+      res.status(502)
+      return res.json({ sucess: false, error: error });
+    }
+    else {
+      var path = '/' + testName;
+      dropboxService.deleteFolder(path)
+      .then(response => {
+        console.log('successfully deleted directory at following path: ' + path);
+        return res.json({ success: true });
+      })
+      .catch(error => {
+        console.log('Directory not deleted from Dropbox! Undoing test delete from database!!');
+        
+        const test = new Test();
+        test.name = testName;
+        test.trials = trials;
+        test.questions = questions;
+
+        test.save(error => {
+          if(error) {
+            return res.json({ success:false, error: 'Test deletion could not be undone from database!!! HUGE ERROR APP WILL IMPLODE!' });
+          }
+        });
+        return res.json({ success: false, error: 'Directory not deleted from Dropbox! Undoing test delete from database!!' });
+      })
+    }//else
+  });//test.delete
 })
 /************************************************************/
 
@@ -262,7 +298,7 @@ router.get('/subjects', (req, res) => {
 //saves subject to database
 router.post('/subjects', (req, res) => {
 	const subject = new Subject();
-	const { age, gender, year, ethnicity, testId } = req.body;
+	const { age, gender, year, ethnicity, testId, testName } = req.body;
 	if(!age) {
 	    return res.json({
 	      success: false,
@@ -294,14 +330,31 @@ router.post('/subjects', (req, res) => {
         error: 'You must provide a testId!'  
       })
   }
+  else if(!testName) {
+      res.status(400);
+      return res.json({
+        success: false,
+        error: 'Error occured. This error wasn not caused by you, it was caused by the app! Please return to the dashboard and try again'  
+      })
+  }
   subject.age = age;
   subject.gender = gender;
   subject.year = year;
   subject.ethnicity = ethnicity;
   subject.testId = testId;
+
   subject.save((error, subject) => {
-    if(error) return res.json({ success: false, error: error});
-    return res.json({ success: true, subjectId: subject._id });
+    if(error){
+      res.status(502);
+      return res.json({ success: false, error: error})
+    }
+    else {
+      // console.log('Successfully created subject in database!');
+      // var directory = '/' + 
+      // dropboxService.createFolder('/' + subject._id +'/')
+      return res.json({ success: true, subjectId: subject._id });
+    }
+
   });
 });
 /************************************************************/

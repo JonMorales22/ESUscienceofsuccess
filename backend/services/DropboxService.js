@@ -53,13 +53,23 @@ export class DropboxService {
 				reject(error)
 			})
 		})
+	}
 
-		// .then(response => {
-		// 	return );
-		// })
-		// .catch(error => {
-		// 	throw(error);
-		// })
+	deleteFolder(path) {
+		console.log('in dropboxservice -> delete folder');
+		console.log(path);
+		return new Promise(function(resolve, reject) {
+			dbx.filesDeleteV2({ path: path })
+			.then(response => {
+				var message = "Folder deleted at: researchly " + path;
+				console.log(message);
+				resolve(message);
+			})
+			.catch(error => {
+				console.log(error);
+				reject(error);
+			})
+		})
 	}
 }
 

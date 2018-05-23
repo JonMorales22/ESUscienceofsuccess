@@ -63,11 +63,16 @@ class TestDashboard extends Component {
 		//checks user has selected a test and that the test exists
 		if(this.state.tests.length>0&&this.state.index>=0) {
 			let test = this.state.tests[this.state.index];
+			
 			let id = test._id;
+			let testName = test.name;
+			let trials = test.trials;
+			let questions = test.questions;
+
 			fetch(`/api/tests/${id}`, { 
 				method: 'DELETE',
 		    	headers: { "Content-Type": "application/json" },
-		    	body: '',
+		    	body: JSON.stringify({ testName, trials, questions })
 		    })
 		    //first takes response, parses it to json. Second it uses the data
 			.then(res => res.json()).then((res) => {
@@ -111,7 +116,9 @@ class TestDashboard extends Component {
 		else if(type === 'take-test') {
 			this.setState({ submit: true });
 			UserStore.setTestId(this.state.tests[this.state.index]._id);
+			UserStore.setTestName(this.state.tests[this.state.index].name)
 			console.log("Test Id:" + UserStore.testId);
+			console.log("Test Name:" + UserStore.testName);
 		}
 		else if(type==='logout') {
 			UserStore.logIn();
