@@ -274,8 +274,30 @@ router.delete('/tests/:testId', (req, res, next) => {
     return res.json({ success: false, error: 'testName, trials, or questions missing from request!'});
   }
 
-  //THIS IS GONNA GET WILD
-  Test.remove({ _id: testId}, error => {
+  /*
+    I am sorry for creating this monstronsity... I was forced to do it because I couldn't figure out how to get the mongoose prehooks/middleware to work.
+    I attempted to maintiain some ACID between my DB and the dropbox folder with this remove statement (ie: trying to make sure that if one of the operations fail, then all of them fail)
+    However I don't think ACID is be possible without using the Mongoose middleware... RIP me
+  
+    I'm going to attempt to comment this and explain whats going on just in case some poor soul inherits this catastrophe.
+
+    The following steps occur:
+      1. Attempt to delete test from database
+      2. if test deleted, then remove folder from dropbox
+      3. if folder successfully deleted from dropbpox, then delete all subjects from database,
+         if folder not succesfully deleted, go to step 5.
+      4. if subjects deleted from database, then delete all responses
+      5. if step 2 fails, then attempt to resave test into database 
+          -->REMEMBER TEST IS ALREADY DELETED FROM DATABASE!!! THIS CASUSES A LOT OF HEADACHES!
+          So when we resave test, the test has a new _id. 
+          Since responses and subjects reference the testId, we must go through and update the testId for all responses and subjects!!!
+      6. if test could not be resaved to database, APP WILL IMPLODE AND THERE IS NO SAVING IT (thats hyperbole, but its still pretty FUCKING bad if it reaches that point)
+      7. update all subjects with the NEW TEST ID
+      8. update all responses with the NEW TEST ID
+      9. I haven't gotten to this error, so I'm not sure what would happen.... :)
+  */
+  //1
+  Test.remove({ _id: testId}, error => { 
     if(error) {
       console.log('could not remove test')
       res.status(502);
@@ -284,57 +306,73 @@ router.delete('/tests/:testId', (req, res, next) => {
     else {
       var path = '/' + testName;
       dropboxService.deleteFolder(path)
+      //2: remove folder from dropbox
       .then(response => {
         console.log('successfully deleted directory at following path: ' + path);
+        console.log('Attempting to delete subjects...')
         return;
       })
+      //3: attempt to delete subjects that reference the deleted test from DB
       .then(response => {
-        console.log('2nd then statement');
         deleteSubjects(testId);
-        console.log('successfully deleted subjects! Moving on...');
+        console.log('successfully deleted subjects!');
+        console.log('Attempting to delete responses...')
         return;
       })
+      //4: attemp to delete responses that reference deleted test from DB
       .then(response => {
-        console.log('3rd then statement');
         deleteResponses(testId);
+        console.log('successfully deleted responses!');
         return res.json({ success: true });
       })
+      //5: if for some reason couldn't remove folder from dropbox, attempt to rever changes
       .catch(error => {
-        console.log('Catch error! Undoing test delete from database!!');
+        console.log('Error! Undoing test delete from database!!');
         const test = new Test();
         test.name = testName;
         test.trials = trials;
         test.questions = questions;
-
         test.save((error, test) => {
           if(error) {
+            //6: if app reaches this state... then only god can help you now.
             console.log('test save error!');
             res.status(502)
             return res.json({ success:false, error: 'Test deletion could not be undone from database!!! HUGE ERROR APP WILL IMPLODE!' });
           }
           else {
+            console.log('Test successfully undeleted!')
+            console.log('Now attempting to update all subjects...');
+            //7: test resaved to database! now update subjects with new test id
             updateSubjects(testId, test._id)
             .then(resolve => {
-              res.status(502);
-              return res.json({success: false, error: 'ERROR: Test cannont be deleted! Changed testId and updated all corresponding Subjects.'})
+              console.log("Subjects successfully updated!");
+              console.log('Now attempting to update all responses...');
+              return;
             })
+            //8: update all responses with new test id
+            .then(resolve => {
+              updateResponses(testId, test._id)
+              console.log('Successfully updated responses!')
+              return;
+            })
+            //9: ?????????
             .catch(error => {
               console.log(error);
+              res.status(502);
+              return res.json({ success: false, error: 'Directory not deleted from Dropbox! Undoing test delete from database!!' });
             }) 
-          }
+          }//else
+          res.status(502);
+          return res.json({ success: false, error: 'Directory not deleted from Dropbox! Undoing test delete from database!! To fix this error: create a folder in dropbox that has the same name as the test you are trying to delete!' });
         });
-        //res.status(502);
-        //return res.json({ success: false, error: 'Directory not deleted from Dropbox! Undoing test delete from database!!' });
-      })
-    }//else
+      })//1st catch
+    }
   });//test.delete
 })
 
 function updateSubjects(oldTestId, newTestId) {
   console.log("in updateSubjects function!");
   return new Promise(function(resolve, reject) {
-    console.log('oldTestId: ' + oldTestId);
-    console.log('newTestId: ' + newTestId);
     var query = {testId: oldTestId}
     Subject.updateMany(query, {testId: newTestId}, error => {
       if(error){
@@ -347,9 +385,21 @@ function updateSubjects(oldTestId, newTestId) {
   })
 }
 
+function updateResponses(oldTestId, newTestId) {
+  return new Promise(function(resolve, reject) {
+    var query = {testId: oldTestId}
+    Response.updateMany(query, {testId: newTestId}, error => {
+      if(error){
+        console.log('error:' + error);
+        throw (error);
+      }
+      else 
+        resolve('Successfully updated all Responses!');
+    });
+  })
+}
+
 function deleteSubjects(testId) {
-  console.log('in deleting subjects');
-  console.log('testId: ' + testId);
   return new Promise(function(resolve, reject) {
     Subject.remove( { testId: testId}, (error) => {
       if(error) {
@@ -364,8 +414,6 @@ function deleteSubjects(testId) {
 }
 
 function deleteResponses(testId) {
-  console.log('in delete responses');
-  console.log('testId: ' + testId);
   return new Promise(function(resolve, reject) {
     Response.remove( { testId: testId}, (error) => {
       if(error) {
