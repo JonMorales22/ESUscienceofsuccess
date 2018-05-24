@@ -20,6 +20,28 @@ var router = express.Router();
 
 //var passport = require('passport');
 
+
+//DEBUGGING ONLY
+router.put('/updateSubjects', (req,res) => {
+  console.log('router get /updateSubjects')
+  const { oldTestId, newTestId } = req.body;
+
+  if(!oldTestId || !newTestId) {
+    res.status(400);
+    res.json({success: false, error: 'Missing 1 or both of the following: oldTestId, newTestId'})
+  }
+
+  updateSubjects(oldTestId, newTestId)
+  .then(resolve => {
+    return res.json({ success: true })
+  })
+  .catch(error => {
+    res.status(500);
+    return res.json({ success: false, error: error });
+  })
+})
+
+
 router.get('/', function(req, res){
   res.render('index')
 });
@@ -264,21 +286,34 @@ router.delete('/tests/:testId', (req, res, next) => {
       dropboxService.deleteFolder(path)
       .then(response => {
         console.log('successfully deleted directory at following path: ' + path);
-        return res.json({ success: true });
+        return;
+      })
+      .then(response => {
+        deleteResponses(testId);
       })
       .catch(error => {
-        console.log('Directory not deleted from Dropbox! Undoing test delete from database!!');
+        console.log('Catch error! Undoing test delete from database!!');
         
         const test = new Test();
         test.name = testName;
         test.trials = trials;
         test.questions = questions;
 
-        test.save(error => {
+        test.save((error, test) => {
           if(error) {
             console.log('test save error!');
             res.status(502)
             return res.json({ success:false, error: 'Test deletion could not be undone from database!!! HUGE ERROR APP WILL IMPLODE!' });
+          }
+          else {
+            updateSubjects(testId, test._id)
+            .then(resolve => {
+              res.status(502);
+              return res.json({success: false, error: 'Test deletion undone, updated all corresponding Subjects.'})
+            })
+            .catch(error => {
+              console.log(error);
+            }) 
           }
         });
         //res.status(502);
@@ -287,6 +322,39 @@ router.delete('/tests/:testId', (req, res, next) => {
     }//else
   });//test.delete
 })
+
+function updateSubjects(oldTestId, newTestId) {
+  console.log("in updateSubjects function!");
+
+  return new Promise(function(resolve, reject) {
+    console.log('oldTestId: ' + oldTestId);
+    console.log('newTestId: ' + newTestId);
+    var query = {testId: oldTestId}
+    Subject.updateMany(query, {testId: newTestId}, error => {
+      if(error){
+        console.log('error:' + error);
+        throw (error);
+      }
+      else 
+        resolve('Successfully updated all subjects!');
+    });
+  })
+}
+
+function deleteResponses(testId) {
+  console.log('in deleting responses');
+  return new Promise(function(resolve, reject) {
+    Response.remove( { testId: testId}, (error) => {
+      if(error) {
+        reject(error);
+      }
+      else {
+        resolve('Deleted all responses corresponding to following test:' + testId);
+      }
+    })
+  })
+}
+
 /************************************************************/
 
 /**************** SUBJECT ROUTES API ************************/
