@@ -296,7 +296,8 @@ router.delete('/tests/:testId', (req, res, next) => {
       })
       .then(response => {
         console.log('3rd then statement');
-
+        deleteResponses(testId);
+        return res.json({ success: true });
       })
       .catch(error => {
         console.log('Catch error! Undoing test delete from database!!');
@@ -331,7 +332,6 @@ router.delete('/tests/:testId', (req, res, next) => {
 
 function updateSubjects(oldTestId, newTestId) {
   console.log("in updateSubjects function!");
-
   return new Promise(function(resolve, reject) {
     console.log('oldTestId: ' + oldTestId);
     console.log('newTestId: ' + newTestId);
@@ -373,7 +373,7 @@ function deleteResponses(testId) {
         throw error;
       }
       else {
-        resolve('Deleted all subjects corresponding to following test:' + testId);
+        resolve('Deleted all responses corresponding to following test:' + testId);
       }
     })
   })
