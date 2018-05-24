@@ -14,4 +14,10 @@ const TestsSchema = new Schema({
   questions: [{ type: Number, type: String}]
 }, { timestamps: true });
 
+
+TestsSchema.pre('remove', function(next) {
+	Response.remove({ testId: this._id }).exec();
+	//Subject.remove({ testId: this_id }).exec();
+});
+
 export default mongoose.model('Test', TestsSchema);

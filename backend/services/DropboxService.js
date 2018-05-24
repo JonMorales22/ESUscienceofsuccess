@@ -61,7 +61,7 @@ export class DropboxService {
 		return new Promise(function(resolve, reject) {
 			dbx.filesDeleteV2({ path: path })
 			.then(response => {
-				var message = "Folder deleted at: researchly " + path;
+				var message = "Folder deleted at: researchly" + path;
 				console.log(message);
 				resolve(message);
 			})

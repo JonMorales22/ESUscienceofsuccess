@@ -174,7 +174,7 @@ class TestDashboard extends Component {
 
 			//we put the test title on first, think of this as an olive or something... idk lol
 			trialsForms.push(<h1>Test Name: {test.name}</h1>)
-
+			trialsForms.push(<h3>Test Id: {test._id} </h3>)
 
 		    for(let x=0;x<trials.length;x++)
 		    {

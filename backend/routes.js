@@ -289,11 +289,17 @@ router.delete('/tests/:testId', (req, res, next) => {
         return;
       })
       .then(response => {
-        deleteResponses(testId);
+        console.log('2nd then statement');
+        deleteSubjects(testId);
+        console.log('successfully deleted subjects! Moving on...');
+        return;
+      })
+      .then(response => {
+        console.log('3rd then statement');
+
       })
       .catch(error => {
         console.log('Catch error! Undoing test delete from database!!');
-        
         const test = new Test();
         test.name = testName;
         test.trials = trials;
@@ -309,7 +315,7 @@ router.delete('/tests/:testId', (req, res, next) => {
             updateSubjects(testId, test._id)
             .then(resolve => {
               res.status(502);
-              return res.json({success: false, error: 'Test deletion undone, updated all corresponding Subjects.'})
+              return res.json({success: false, error: 'ERROR: Test cannont be deleted! Changed testId and updated all corresponding Subjects.'})
             })
             .catch(error => {
               console.log(error);
@@ -341,19 +347,39 @@ function updateSubjects(oldTestId, newTestId) {
   })
 }
 
-function deleteResponses(testId) {
-  console.log('in deleting responses');
+function deleteSubjects(testId) {
+  console.log('in deleting subjects');
+  console.log('testId: ' + testId);
   return new Promise(function(resolve, reject) {
-    Response.remove( { testId: testId}, (error) => {
+    Subject.remove( { testId: testId}, (error) => {
       if(error) {
-        reject(error);
+        console.log(error);
+        throw error;
       }
       else {
-        resolve('Deleted all responses corresponding to following test:' + testId);
+        resolve('Deleted all subjects corresponding to following test:' + testId);
       }
     })
   })
 }
+
+function deleteResponses(testId) {
+  console.log('in delete responses');
+  console.log('testId: ' + testId);
+  return new Promise(function(resolve, reject) {
+    Response.remove( { testId: testId}, (error) => {
+      if(error) {
+        console.log(error);
+        throw error;
+      }
+      else {
+        resolve('Deleted all subjects corresponding to following test:' + testId);
+      }
+    })
+  })
+}
+
+
 
 /************************************************************/
 
@@ -445,7 +471,7 @@ router.get('/responses', (req, res) => {
 //save response
 router.post('/responses', (req, res) => {
   const response  = new Response();
-  const { subjectId, testId, trialIndex, questionIndex, data } = req.body;
+  const { subjectId, testId, trialsIndex, questionsIndex, data } = req.body;
   if(!subjectId) {
       return res.json({
         success: false,
@@ -458,29 +484,29 @@ router.post('/responses', (req, res) => {
         error: 'Need a testId!'
       });
   }
-  else if (!trialIndex) {
+  else if (!trialsIndex) {
       return res.json({
         success: false,
-        error: 'Must provide a test index!!'
+        error: 'Must provide a trial index!!'
       });
   }
-  else if (!questionIndex) {
+  else if (!questionsIndex) {
       return res.json({
         success: false,
         error: 'Must provide a question index!'
       });
   }
-  else if (!data) {
-      return res.json({
-        success: false,
-        error: 'Must provide data!'
-      });
-  }
+  // else if (!data) {
+  //     return res.json({
+  //       success: false,
+  //       error: 'Must provide data!'
+  //     });
+  // }
   response.subjectId = subjectId;
   response.testId = testId;
-  response.trialIndex = trialIndex;
-  response.questionIndex = questionIndex;
-  response.data = data;
+  response.trialsIndex = trialsIndex;
+  response.questionsIndex = questionsIndex;
+  //response.data = data;
   response.save(error => {
     if(error) return res.json({ success: false, error: error});
     return res.json({ success: true });
