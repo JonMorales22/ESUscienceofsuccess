@@ -8,6 +8,7 @@ import Test from './components/Test';
 import DiscloseAgreement from './components/DiscloseAgreement';
 import DemographicSurvey from './components/DemographicSurvey';
 import Login from './components/Login'
+import Debriefing from './components/Debriefing'
 import NotFound from './components/NotFound'
 
 const Routes = () => (
@@ -18,6 +19,7 @@ const Routes = () => (
 			<Route exact path='/test-creator' component={TestCreator} />
 			<Route exact path='/test' component={Test} />
 			<Route exact path='/demographic-survey' component={DemographicSurvey} />
+			<Route exact path='/debriefing' component={Debriefing} />
 			<Route exact path='/login' component={Login} />
 			<Route component={NotFound} />
 		</Switch>

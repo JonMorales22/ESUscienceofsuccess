@@ -7,6 +7,10 @@ var fs = require('fs');
 
 export class DropboxService {
 
+	/*	saves the audiofile in dropbox:
+	 	the path should follow the following params:
+		/testName/subjectId/trialNumber-QuestionNumber.wav
+	*/
 	saveAudio(filename,resp) {
 		console.log('in dropboxservice -> save test');
 

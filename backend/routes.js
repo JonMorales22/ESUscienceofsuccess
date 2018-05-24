@@ -46,15 +46,6 @@ router.get('/', function(req, res){
   res.render('index')
 });
 
-// function checkAuthentication(req, res, next) {
-//   if(req.user) {
-//     next();
-//   }
-//   else {
-//     res.json({ success:false, error: 'user not authenticated!'});
-//   }
-// }
-
 router.post('/audioresponse', (req, res) => {
   const { subjectId, testId, trialsIndex , questionsIndex, audio } = req.body;
   const response = new Response();
@@ -443,50 +434,22 @@ router.get('/subjects', (req, res) => {
 //saves subject to database
 router.post('/subjects', (req, res) => {
 	const subject = new Subject();
-	const { age, gender, year, ethnicity, testId, testName } = req.body;
-	if(!age) {
-	    return res.json({
-	      success: false,
-	      error: 'You must provide an age!'
-	    });
+	const { age, gender, year, religion, ethnicity, testId, testName } = req.body;
+	if(!age || !gender || !year || !ethnicity || !religion) {
+	    res.status(400)
+      return res.json({ success: false, error: 'One or more of the following data are missing: age, gender, year of education, ethnicity, religiosity.' });
 	}
-  else if (!gender) {
-      return res.json({
-        success: false,
-        error: 'You must provide a gender!'
-      });
-  }
-	else if (!year) {
-	    return res.json({
-	      success: false,
-	      error: 'You must provide a year!'
-	    });
-	}
-	else if (!ethnicity) {
-	    return res.json({
-	      success: false,
-	      error: 'You must provide an ethnicity!'
-	    });
-	}
-  else if (!testId) {
+  else if (!testId || testName) {
       res.status(400);
-      return res.json({
-        success: false,
-        error: 'You must provide a testId!'  
-      })
+      return res.json({ success: false, error: 'Error! Both Test Id and Test Name are required!' })
   }
-  else if(!testName) {
-      res.status(400);
-      return res.json({
-        success: false,
-        error: 'Error occured. This error was not caused by you, it was caused by the app! Please return to the dashboard and try again'  
-      })
-  }
+
   subject.age = age;
   subject.gender = gender;
   subject.year = year;
   subject.ethnicity = ethnicity;
   subject.testId = testId;
+  subject.religion = religion;
 
   subject.save((error, subject) => {
     if(error){
@@ -494,9 +457,6 @@ router.post('/subjects', (req, res) => {
       return res.json({ success: false, error: error})
     }
     else {
-      // console.log('Successfully created subject in database!');
-      // var directory = '/' + 
-      // dropboxService.createFolder('/' + subject._id +'/')
       return res.json({ success: true, subjectId: subject._id });
     }
 

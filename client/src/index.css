@@ -21,6 +21,21 @@ body {
 
 }
 
+.demographic-survey p {
+	margin: 5px;
+}
+
+.demographic-survey select {
+	width: 200px;
+	margin-bottom: 15px;
+	text-align: center;
+
+}
+
+.demographic-survey input{
+	margin: 15px;
+}
+
 .btn{
 	color: #111;
 }

@@ -25,8 +25,9 @@ class DemographicSurvey extends Component {
 		this.state = ({
 			age: 18,
 			gender: 'male',
-			year: 'freshman',
+			year: 'highschool',
 			ethnicity: 'white',
+			religion: 1,
 			submit: false,
 		});
 
@@ -38,13 +39,13 @@ class DemographicSurvey extends Component {
 	//Receives the subject id in the response body, which is saved in UserStore
 	saveSubject() {
 
-		const {age, gender, ethnicity, year} = this.state;
+		const {age, gender, ethnicity, year, religion} = this.state;
 		
 		const testId = UserStore.testId;
 		const testName = UserStore.testName;
 
-		if(!age || !gender || !ethnicity || !year) {
-			alert("Must input age, gender, ethnicity, and year!");
+		if(!age || !gender || !ethnicity || !year || !religion) {
+			alert("Must input age, gender, ethnicity, relgiosity, and year!");
 			return;
 		}
 		else if(!testId || !testName) {
@@ -53,7 +54,7 @@ class DemographicSurvey extends Component {
 		fetch('api/subjects', {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ age, gender, ethnicity, year, testId, testName }),
+			body: JSON.stringify({ age, gender, ethnicity, year, religion, testId, testName }),
 		})
 		//subject's id should be in the response body, which is saved in UserStore.
 		.then(res => res.json()).then((res) => {
@@ -61,7 +62,7 @@ class DemographicSurvey extends Component {
 				UserStore.setAnsweredSurvey();
 				UserStore.setUserId(res.subjectId)
 				console.log("TestStore.userId: " + UserStore.userId);
-				//this.setState({ submit: true});
+				this.setState({ submit: true});
 			}
 			else if (res.success === false) {
 				alert("Oops! Something went wrong, please return to dashboard and try again.");
@@ -72,6 +73,7 @@ class DemographicSurvey extends Component {
 	handleChange(event) {
 		let type = event.target.name;
 		let value = event.target.value;
+
 		if(type === 'age') {
 			this.setState({ age: value });
 		}
@@ -79,11 +81,13 @@ class DemographicSurvey extends Component {
 			this.setState({ gender: value })
 		}
 		else if(type === 'year') {
-			this.setState({ year: value});
+			this.setState({ year: value });
 		}
 		else if(type === 'ethnicity'){
-			this.setState({ ethnicity: value});
-		}	
+			this.setState({ ethnicity: value });
+		}
+		else if(type === 'religion')
+			this.setState({ religion: value });	
 	}
 
 	handleSubmit(event) {
@@ -103,16 +107,19 @@ class DemographicSurvey extends Component {
 	render () {
 		let ageForm = this.renderAgeForm();
 		if(this.state.submit){
-			return <Redirect to='/test'/>
+			return <Redirect to='/debriefing'/>
 		}
 		return (
 			<form onSubmit={this.handleSubmit}>
 				<div className='demographic-survey'>
-					<h3>Demographic Questions</h3>
-					Age: {ageForm}
+					<h1>Demographic Questions</h1>
+					<h3>Please fill out the following information:</h3>
 					
+					<p>Age:</p>
+					{ageForm}
 					<br/>
-					Please select gender:
+
+					<p>Gender:</p>
 					<select name='gender' value={this.state.gender} onChange={this.handleChange}>
 						<option value='male'>Male</option>
 						<option value='female'>Female</option>
@@ -120,10 +127,11 @@ class DemographicSurvey extends Component {
 						<option value='other'>Other</option>
 						<option value='none'>Prefer not to answer</option>
 					</select>
-
 					<br/>
-					Please select current/closest year of education:
+
+					<p>Highest Level of Education:</p>
 					<select name='year' value={this.state.year} onChange={this.handleChange}>
+						<option value='highschool'>High School</option>
 						<option value='freshman'>Freshman</option>
 						<option value='sophomore'>Sophomore</option>
 						<option value='junior'>Junior</option>
@@ -135,9 +143,9 @@ class DemographicSurvey extends Component {
 						<option value='other'>Other</option>
 						<option value='none'>Prefer not to answer</option>
 					</select>
-
 					<br/>
-					Please select ethnicity:
+
+					<p>Ethnicity:</p>
 					<select name='ethnicity' value={this.state.ethnicity} onChange={this.handleChange}>
 						<option value='white'>White</option>
 						<option value='black'>Black</option>
@@ -148,6 +156,18 @@ class DemographicSurvey extends Component {
 						<option value='other'>Other</option>
 						<option value='none'>Prefer not to answer</option>
 					</select>
+					<br/>
+
+					<p>Level of Religiosity: (4=high level of religiosity)</p>
+					<select name='religion' value={this.state.religion} onChange={this.handleChange}>
+						<option value='1'>1</option>
+						<option value='2'>2</option>
+						<option value='3'>3</option>
+						<option value='4'>4</option>
+						<option value='none'>Prefer not to answer</option>
+					</select>
+					<br/>
+
 				</div>
 				<input type='submit' value='Submit'/>
 			</form>

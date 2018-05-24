@@ -226,7 +226,7 @@ class TestDashboard extends Component {
 
 		//redirects use to the 1st part of our test, the demographic survey
 		if(this.state.submit === true){
-			return <Redirect to='/demographic-survey' />
+			return <Redirect to='/test' />
 		}
 		//if user is logged in, render Researcher view
 		else if(UserStore.isLoggedIn) {
