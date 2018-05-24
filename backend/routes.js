@@ -230,7 +230,6 @@ router.post('/tests', (req, res, next) => {
           //if for some reason the app couldn't delete the test from database, notify user and HOPEFULLY THEY WILL TAKE CARE OF IT.... (I realize that this is really bad and the user probably won't delete the test, but I have no other options :'(... )
           if(error) return res.json({ success: false, error: "Warning! Test was saved to database, but the app could not create corresponding folder in Dropbox! This can lead to errors and the app will implode! Please delete the test you just created from manually from the dashboard and try again!"})
         });
-        return res.json({ success: false, error: 'Error creating folder in dropbox! Deleting test in database Please try again.' });
       })//catch
     } //else
   });//test.save
@@ -256,7 +255,8 @@ router.delete('/tests/:testId', (req, res, next) => {
   //THIS IS GONNA GET WILD
   Test.remove({ _id: testId}, error => {
     if(error) {
-      res.status(502)
+      console.log('could not remove test')
+      res.status(502);
       return res.json({ sucess: false, error: error });
     }
     else {
@@ -276,10 +276,13 @@ router.delete('/tests/:testId', (req, res, next) => {
 
         test.save(error => {
           if(error) {
+            console.log('test save error!');
+            res.status(502)
             return res.json({ success:false, error: 'Test deletion could not be undone from database!!! HUGE ERROR APP WILL IMPLODE!' });
           }
         });
-        return res.json({ success: false, error: 'Directory not deleted from Dropbox! Undoing test delete from database!!' });
+        //res.status(502);
+        //return res.json({ success: false, error: 'Directory not deleted from Dropbox! Undoing test delete from database!!' });
       })
     }//else
   });//test.delete
@@ -334,7 +337,7 @@ router.post('/subjects', (req, res) => {
       res.status(400);
       return res.json({
         success: false,
-        error: 'Error occured. This error wasn not caused by you, it was caused by the app! Please return to the dashboard and try again'  
+        error: 'Error occured. This error was not caused by you, it was caused by the app! Please return to the dashboard and try again'  
       })
   }
   subject.age = age;

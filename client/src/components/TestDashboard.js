@@ -77,7 +77,7 @@ class TestDashboard extends Component {
 		    //first takes response, parses it to json. Second it uses the data
 			.then(res => res.json()).then((res) => {
 				if(!res.success) { 
-					this.setState({ error: res.error})
+					//this.setState({ error: res.error})
 					alert(res.error);
 				}
 				else {

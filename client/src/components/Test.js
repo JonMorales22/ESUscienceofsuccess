@@ -17,8 +17,8 @@ import 'whatwg-fetch';
 let responseStore = new ResponseStore(20);
 
 //FOR DEBUGGING ONLY
-UserStore.setTestId('5b05d99bd305b68e1847c16e');
-UserStore.setUserId('5b0406ea63112b5a43062a30');
+// UserStore.setTestId('5b05d99bd305b68e1847c16e');
+// UserStore.setUserId('5b0406ea63112b5a43062a30');
 
 //custom CSS used for our Modal,
 const customStyles = {
@@ -86,7 +86,9 @@ class TestTaker extends Component {
 		fetch(`/api/tests/${test_id}`, { method: 'GET' })
 		.then(data => data.json())
 		.then((res) => {
-			if(!res.success) this.setState({ error: res.error});
+			if(!res.success){
+				alert( 'error: ' + res.error);
+			} 
 			else {
 				let testname = res.test[0].name;
 				let trials = res.test[0].trials;
