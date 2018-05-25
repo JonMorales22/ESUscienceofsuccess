@@ -14,10 +14,12 @@ export class DropboxService {
 	saveAudio(fileName, path) {
 		console.log('in dropboxservice -> save test');
 		console.log(path);
-		var audiofile = fs.readFile(fileName, (error,data) => {
+
+		return new Promise((resolve, reject) => {
+			var audiofile = fs.readFile(fileName, (error,data) => {
 			if(error) {
 				console.log('error:' + error);
-				throw error;
+				reject(error)
 			}
 			var params = {
 				contents: data,
@@ -32,12 +34,14 @@ export class DropboxService {
 
 			dbx.filesUpload(params)
 			.then(response => {
-				console.log('file uploaded!');
+				resolve('file uploaded!');
 			})
 			.catch(error => {
-				console.log(error);
+				reject(error);
 			})
 		});
+		})
+
 
 	}
 

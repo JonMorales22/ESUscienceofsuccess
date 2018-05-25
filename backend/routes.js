@@ -90,8 +90,21 @@ function handleAudio(audio, filename, testName, subjectId) {
     var ass = convertedAudioFile.substring(convertedAudioFile.indexOf('/')+1);
     //console.log(convertedAudioFile);
     var path = '/'+ testName + '/' + subjectId + '/' + ass;
-    dropboxService.saveAudio(convertedAudioFile, path);
-    //var promise2 = handleAudioService(convertedAudioFile);
+    var promise1 = handleAudioService.sendAudioToExternalService(convertedAudioFile);
+    var promise2 = dropboxService.saveAudio(convertedAudioFile, path);
+
+    Promise.all([promise1, promise2]).then(responses => {
+
+      Response.updateOne({ subjectId: subjectId }, {data: responses[0]}, (error, res) => {
+        if(error)
+          throw error
+        else 
+          console.log(res);
+      })
+
+      console.log(responses[0]);
+      console.log(responses[1]);
+    })
   })
   .catch(error => {
     console.log(error);

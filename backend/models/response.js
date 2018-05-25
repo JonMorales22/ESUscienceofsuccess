@@ -7,7 +7,7 @@ const ResponsesSchema = new Schema({
 	trialsIndex: Number,
 	questionsIndex: Number,
 	audio: String,
-	//data: { latency: Number, time: Number, text: String },
+	data: {transcript: String, latency: Number },
 });
 
 export default mongoose.model('Response', ResponsesSchema);

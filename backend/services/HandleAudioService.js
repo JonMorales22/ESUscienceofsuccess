@@ -47,6 +47,15 @@ export class HandleAudioService {
 		// })
 
 	sendAudioToExternalService(fileName) {
+		return new Promise((resolve, reject) => {
+			googleSpeechService.analyzeSpeech(fileName)
+			.then(data => {
+				resolve(data);
+			})
+			.catch(error => {
+				reject(error);
+			})
+		})
 
 	}
 
