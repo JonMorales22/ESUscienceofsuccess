@@ -3,7 +3,6 @@ import {RadioGroup, Radio} from 'react-radio-group'
 import { Redirect, Link } from 'react-router-dom'
 import { observer } from "mobx-react";
 import DevTools from "mobx-react-devtools";
-
 import UserStore from '../stores/UserStore';
 import 'whatwg-fetch';
 
@@ -111,13 +110,15 @@ class TestDashboard extends Component {
 		    //first takes response, parses it to json. then it uses the data
 			.then(res => res.json()).then((res) => {
 				if(!res.success) { 
-					//this.setState({ error: res.error})
 					alert(res.error);
 				}
 				else {
 					//removes selected test from this objects state... admittedly I should probably be using MOBx for this, but whatevs
 					// UserStore.setTestId(this.state.tests[this.state.index]._id);
 					// UserStore.setTestName(this.state.tests[this.state.index].name)
+
+					//TEST THIS OUT LATER!! IT SHOULD WORK, BUT I DIDN'T TEST IT!!!!
+					//UserStore.setSubjectId(res.subject._id);
 					console.log("Test Id:" + UserStore.testId);
 					console.log("Test Name:" + UserStore.testName);
 					this.setState({ submit: true });

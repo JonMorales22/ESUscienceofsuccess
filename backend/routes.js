@@ -47,7 +47,7 @@ router.get('/', function(req, res){
 });
 
 router.post('/audioresponse', (req, res) => {
-  const { subjectId, testId, trialsIndex , questionsIndex, audio } = req.body;
+  const { subjectId, testId, testName, trialsIndex , questionsIndex, audio } = req.body;
   const response = new Response();
 
   console.log("subjectId:" + subjectId);
@@ -56,7 +56,7 @@ router.post('/audioresponse', (req, res) => {
   console.log("questionsIndex:" + questionsIndex);
 
   //!trialsIndex returns true when trialsIndex = 0, same for questionsIndex... therefore I used this ugly syntax 
-  if(!subjectId || !testId || !audio || trialsIndex === null || questionsIndex === null ) {
+  if(!subjectId || !testId || !testName ||!audio || trialsIndex === null || questionsIndex === null ) {
     res.status(400);
     return res.json({ success: false, error: 'Missing one or more of the following: subjectId, testId, trialIndex, questionIndex, audio.'})
   } 
@@ -72,8 +72,7 @@ router.post('/audioresponse', (req, res) => {
       return res.json({ success: false, error: error});
     }
     else {
-      var filename = 'trial'+ (trialsIndex+1) + '-question' + (questionsIndex+1);
-      let testName = 'exampleTest'; //<----REMOVE LATER
+      var filename = 'trial'+ (trialsIndex) + '-question' + (questionsIndex);
       handleAudio(audio, filename, testName , subjectId, data._id);
       return res.json({ success: true });
     }
@@ -482,7 +481,7 @@ router.post('/subjects', (req, res) => {
       .then(() => {
         //if successfully saved directory in dropbox, returns true and everything is kosher 
         console.log("Successfully directory in dropbox at following path: " + path);
-        return res.json({ success: true });
+        return res.json({ success: true, subject: subject });
       })
       .catch(error => {
         console.log("Error creating folder in dropbox! Deleting subject in database Please try again.");
@@ -507,37 +506,45 @@ router.post('/subjects', (req, res) => {
 
 //subject to database
 //commented out for now
-// router.put('/subjects', (req, res) => {
-// 	const subject = new Subject();
-// 	const { age, gender, year, religion, ethnicity, testId, testName } = req.body;
-// 	if(!age || !gender || !year || !ethnicity || !religion) {
-// 	    res.status(400)
-//       return res.json({ success: false, error: 'One or more of the following data are missing: age, gender, year of education, ethnicity, religiosity.' });
-// 	}
-//   else if (!testId || !testName) {
-//       res.status(400);
-//       return res.json({ success: false, error: 'Error! Both Test Id and Test Name are required!' })
-//   }
+router.put('/subjects', (req, res) => {
+	const subject = new Subject();
+	const { subjectId, age, gender, year, religion, ethnicity, testId, testName } = req.body;
+	if( !age || !gender || !year || !ethnicity || !religion) {
+	    res.status(400)
+      return res.json({ success: false, error: 'One or more of the following data are missing: subjectId, age, gender, year of education, ethnicity, religiosity.' });
+	}
+  else if (!testId || !testName || !subjectId ) {
+      res.status(400);
+      return res.json({ success: false, error: 'Error! Both Test Id and Test Name are required!' })
+  }
 
-//   subject.age = age;
-//   subject.gender = gender;
-//   subject.year = year;
-//   subject.ethnicity = ethnicity;
-//   subject.testId = testId;
-//   subject.religion = religion;
+  var subjectData = {
+    age: age,
+    gender: gender,
+    year: year,
+    ethnicity: ethnicity,
+    testId: testId,
+    religion: religion 
+  }
+  // subject.age = age;
+  // subject.gender = gender;
+  // subject.year = year;
+  // subject.ethnicity = ethnicity;
+  // subject.testId = testId;
+  // subject.religion = religion;
       
     //this should probaby be something other than subject.save, probably subject.put or something
-//   subject.save((error, subject) => {
-//     if(error){
-//       res.status(502);
-//       return res.json({ success: false, error: error})
-//     }
-//     else {
-//       return res.json({ success: true, subjectId: subject._id });
-//     }
 
-//   });
-// });
+  Subject.findByIdAndUpdate(subjectId, subjectData, error => {
+    if(error) {
+      res.status(502)
+      return res.json({ success: false, error: error})
+    }
+    else {
+      return res.json({ success: true });
+    }
+  })
+});
 /************************************************************/
 
 //subjectId: 5aed16a156530645e150e51f

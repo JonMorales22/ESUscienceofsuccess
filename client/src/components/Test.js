@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Modal from 'react-modal';
+import { Redirect } from 'react-router-dom'
 import { observer } from "mobx-react";
 import DevTools from "mobx-react-devtools";
 
@@ -64,10 +65,11 @@ class TestTaker extends Component {
 			testname: null,
 			trials: null,
 			questions: null,
-			questionsIndex: 0, //index used to keep track of what question the Subject is currently answering
-			trialsIndex: 0, //index used to keep track of what trial the subject is currently on
+			questionsIndex: 19, //index used to keep track of what question the Subject is currently answering
+			trialsIndex: 4, //index used to keep track of what trial the subject is currently on
 			questionsPerTrial: 0,
 			modalIsOpen: true, //show modal which notifies the Subject what trial they are on
+			submit: false
 		});
 		this.handleClick = this.handleClick.bind(this);
 		this.openModal = this.openModal.bind(this);
@@ -108,12 +110,13 @@ class TestTaker extends Component {
 		let blobURL = audiofile.blobURL;
 
 		let testId = UserStore.testId;
+		let testName = UserStore.testName;
 		let subjectId = UserStore.userId;
 		let trialsIndex = this.state.trialsIndex;
 		let questionsIndex = this.state.questionsIndex;
 
 		if(!blob) {
-			console.log('audiofile doesn not exist!');
+			console.log('audiofile does not exist!');
 			return;
 		}
 		var reader = new FileReader();
@@ -123,7 +126,7 @@ class TestTaker extends Component {
 			fetch('/api/audioresponse', {
 				method: 'POST',
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ subjectId, testId, trialsIndex, questionsIndex, audio })
+				body: JSON.stringify({ subjectId, testId, testName, trialsIndex, questionsIndex, audio })
 			})
 			.then(res => res.json()).then((res) => {
 				console.log(res);
@@ -159,10 +162,10 @@ class TestTaker extends Component {
 			//checks response store to see if we have a response, or if the user can skip the question
 			if(!response.hasResponse && !response.canSkip) {
 				alert('Warning: You have not recorded a response! If you wish to skip the question, click the next button again.');
-				responseStore.setSkip();
+				//responseStore.setSkip();
 			}
 			else if( response.hasResponse || response.canSkip) {
-				this.saveResponse();
+				//this.saveResponse();
 				//if we are on question 0,4,8,12,16 then we show the modal
 				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
 					this.incrementTrialsIndex();
@@ -171,6 +174,9 @@ class TestTaker extends Component {
 				if(this.state.questionsIndex < this.state.questions.length-1) {
 					responseStore.incrementIndex();
 					this.incrementQuestionsIndex();
+				}
+				else{
+					this.setState({ submit: true})
 				}
 			}
 		}
@@ -191,7 +197,10 @@ class TestTaker extends Component {
 	  	NEED TO ADD A LINK THAT TAKES USER BACK TO DASHBOARD!!!!
 	*/
 	render() {
-		if(this.state.trials && this.state.questions) {
+		if(this.state.submit === true) {
+			return <Redirect to='/demographic-survey'/>
+		}
+		else if(this.state.trials && this.state.questions) {
 			return(
 				<div className='test-taker'>
 					<div>

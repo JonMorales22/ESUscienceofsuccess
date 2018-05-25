@@ -5,14 +5,14 @@ import { observable, action } from "mobx";
 export class UserStore {
 	@observable isLoggedIn = true;
 	@observable answeredSurvey = false;
-	@observable userId = '5b078f1fa8d8893a2c5d1219';
+	@observable subjectId = '5b078f1fa8d8893a2c5d1219';
 	@observable testId = '5b074d7a0ad765371d028005';
 	@observable testName = 'exampleTest';
 	
 
 	// @action.bound
-	// setUserId(userId) {
-	// 	this.userId = userId; //commented out for debugging only
+	// setSubjectId(subjectId) {
+	// 	this.subjectId = subjectId; //commented out for debugging only
 	// }
 
 	// @action.bound
