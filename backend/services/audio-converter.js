@@ -68,58 +68,62 @@ export class audioConverter {
 		console.log('in convertAudio => ');
 		var oldAudioFile = directory + fileName + originalAudioType;
 		var newAudioFile = directory + fileName + convertedAudioType;
-		var newAudioFileMono = directory + fileName + '-mono' + convertedAudioType;
-		
-		this.convertToWav(oldAudioFile, newAudioFile)
-		.then(() => {
-			this.convertWavToMono(newAudioFile, newAudioFileMono)
-			return;
-		})
-		.catch(error => {
-			console.log(error)
-			throw error;
-		})
-	}
 
-	/*
-		convertToWav
-			
-		params:
-			oldFile - 
-			newFile - 
-	*/
-	convertToWav(oldFile, newFile) {
-		console.log('trying to convert ' + oldFile + ' -> ' + newFile);
 		return new Promise((resolve, reject) => {
-			shell.exec('./services/./ffmpeg -y -i ' + oldFile + ' -vn ' + newFile + ' -loglevel quiet', error => {
-				if(error) {
-					reject(error);
-				}
-				else {
-					var message = 'successfully converted to ' + convertedAudioType;
-					console.log(message);
-					resolve(message);
-				}
-			})
-		})
-	}
-
-	convertWavToMono(oldFile, newFile) {
-		console.log('trying to convert ' + oldFile + ' -> ' + newFile);
-		return new Promise((resolve, reject) => {
-			shell.exec('./services/./ffmpeg -y -i ' + oldFile + ' -ac 1 ' + newFile + ' -loglevel quiet', error => {
+			shell.exec('./services/./ffmpeg -y -i ' + oldAudioFile + ' -vn  -ac 1 ' + newAudioFile + ' -loglevel quiet', error => {
 				if(error) {
 					console.log(error);
 					reject(error);
 				}
 				else {
-					var message = 'succesfully converted to mono.' + convertedAudioType;
+					var message = 'successfully converted to ' + convertedAudioType;
 					console.log(message);
-					resolve(message);
+					resolve(newAudioFile);
 				}
 			})
 		})
 	}
+
+	/*
+		convertToWav
+			this method is very similar to convertToWavMono, the only difference is in the shell.js call. 
+			I could have merged the 2 methods into one, and set a flag which would determine whether to make the audio 
+		params:
+			oldFile - 
+			newFile - 
+	// */
+	// convertToWav(oldFile, newFile) {
+	// 	console.log('trying to convert ' + oldFile + ' -> ' + newFile);
+	// 	return new Promise((resolve, reject) => {
+	// 		shell.exec('./services/./ffmpeg -y -i ' + oldFile + ' -vn  -ac 1 ' + newFile + ' -loglevel quiet', error => {
+	// 			if(error) {
+	// 				reject(error);
+	// 			}
+	// 			else {
+	// 				var message = 'successfully converted to ' + convertedAudioType;
+	// 				console.log(message);
+	// 				resolve(message);
+	// 			}
+	// 		})
+	// 	})
+	// }
+
+	// convertWavToMono(oldFile, newFile) {
+	// 	console.log('trying to convert ' + oldFile + ' -> ' + newFile);
+	// 	return new Promise((resolve, reject) => {
+	// 		shell.exec('./services/./ffmpeg -y -i ' + oldFile + ' -ac 1 ' + newFile + ' -loglevel quiet', error => {
+	// 			if(error) {
+	// 				console.log(error);
+	// 				reject(error);
+	// 			}
+	// 			else {
+	// 				var message = 'succesfully converted to mono.' + convertedAudioType;
+	// 				console.log(message);
+	// 				resolve(message);
+	// 			}
+	// 		})
+	// 	})
+	// }
 
 	// checkFile(fileName) {
 	// 	console.log('in checkFile -> fileName: ' + fileName);

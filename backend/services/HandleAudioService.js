@@ -13,7 +13,18 @@ export class HandleAudioService {
 		})
 		.then(result=> {
 			audioconverter.convertAudio(filename)
+			.then(newFileName => {
+				googlespeech.analyzeSpeech(newFileName)
+				.then(data => {
+					console.log("Audio successfully transcribed!");
+					console.log(data)
+					return;
+				})
+				return;
+			})
+			return;
 		})
+		.then()
 		.catch(error => {
 			console.log(error);
 		})
