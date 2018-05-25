@@ -1,77 +1,140 @@
-//import {googlespeech} from '../googleAPI/googleAPI.js';
-//import {dropboxtest} from '../dropboxAPI/dropboxService.js';
-
 var shell = require('shelljs');
 var atob = require('atob');
 var fs = require('fs');
 
-//var reader = new FileReader();
+//don't know why this audio-converter automatically outputs to the /backend directory, so I just added this variable to put all output in a /backend/audio directory 
+const directory = 'audio/'
+
+//if you need to convert audio files from something other than webm to wav, I guess you can just change these variables
+const originalAudioType = '.webm'
+const convertedAudioType = '.wav'
+
+/*
+	AudioConverter:
+		This class converts an audio file  encoded in base64, converts it to binary, and then converts it to .webm, then saves it to disk.
+		The class then converts that .webm file to .wav, and then turns that .wav into a mono file.
+		It relies on a program called ffmpeg (which is pretty dope btw) to convert from .web to .wav. 
+		I use shell.js is an npm package used to perform terminal commands and call ffmpeg, I couldn't figure out a better way to use ffmpeg from script
+		Not really sure how this class converts from base64 to .webm, I found some jesus code on stack exchange and plugged it in and it worked
+		Params: none
+		returns : none
+*/
 
 export class audioConverter {
-	constructor() {}
 
-	//this surprisngly works synchronously... pretty I'm gonna have to make sure this works asynchronously later
-	//I see this as a source of blocking
-	saveAudio(base64Audio) {
+
+	/*
+		saveAudio
+			takes in an audio file encoded in base64, converts it to binary, and then converts it to webm,
+			finally it saves it to disk.
+			this surprisngly works synchronously... pretty sure I'm gonna have to make sure this works asynchronously later
+		params: 
+			base64Audio - audio file encoded in base64, this file will be convreted to webm
+			fileName - the name of the converted file webm file
+		returns:
+			promise that contains the new file name. returning a promise with the filename/type makes this more flexible, 
+			just in case I want to convert the base64 audio to something other than webm in the future (only god knows if I'd ever do that)
+	*/
+	saveAudio(base64Audio, fileName) {
+		console.log('Attempting to save ' + fileName + ' to disk...');
+		var newFileName = directory + fileName + originalAudioType;
 		//blocking may occur here in this function call... idk how quickly the base64 webmfile can be converted to binary data
 		var audio = this.convertDataURIToBinary(base64Audio); 
-		var filename = './audio/audio.webm';
 		
 		return new Promise(function(resolve, reject) {
-			fs.writeFile(filename, audio, (err,res) => {
+			//save file to disk, if error occurs abandon all hope
+			fs.writeFile(newFileName, audio, (err,res) => {
 				if(err) 
 					reject(err);
 				else {
-					resolve('Audio successfully converted!')
+					console.log(fileName + ' successfully saved to disk with following name: ' + newFileName)
+					resolve(newFileName);
 				} 
 				//this.checkFiles('audio/output.wav', 'audio/outputMono.wav', this.convertAudio(filename));
 			})	
 		})
 	}
 
-	convertAudio(filename) {
-		var filename1 = 'filename'
-		this.checkFiles()
-		shell.exec('./services/ffmpegAPI/./ffmpeg -i ./audio/audio.webm -vn audio/output.wav -loglevel quiet', function(err) {
-			//console.log('in 1st convert');
-			if(err) throw err;
-      		shell.exec('./services/ffmpegAPI/./ffmpeg -i output.wav -ac 1 audio/outputMono.wav -loglevel quiet', function(err) {
-      			//console.log('in 2nd convert');
-      			if(err) throw err;
-      			return 'successfully converted audio.'
-      			//dropboxtest.saveAudio('outputMono.wav');
-      			//googlespeech.analyzeSpeech('outputMono.wav');
-      		});
-      	});
+	/*
+		convertAudio
+			this method is basically an interface for external classes to use the audio-converter.
+			first it converts the .webm file to wav, then it converts the new wav file from stereo to mono
+		params:
+			fileName - 
+		returns:
+			nono - might have to return a promise later
+	*/
+	convertAudio(fileName) {
+		console.log('in convertAudio => ');
+		var oldAudioFile = directory + fileName + originalAudioType;
+		var newAudioFile = directory + fileName + convertedAudioType;
+		var newAudioFileMono = directory + fileName + '-mono' + convertedAudioType;
+		
+		this.convertToWav(oldAudioFile, newAudioFile)
+		.then(() => {
+			this.convertWavToMono(newAudioFile, newAudioFileMono)
+			return;
+		})
+		.catch(error => {
+			console.log(error)
+			throw error;
+		})
 	}
 
-	convertToWav() {
-
+	/*
+		convertToWav
+			
+		params:
+			oldFile - 
+			newFile - 
+	*/
+	convertToWav(oldFile, newFile) {
+		console.log('trying to convert ' + oldFile + ' -> ' + newFile);
+		return new Promise((resolve, reject) => {
+			shell.exec('./services/./ffmpeg -y -i ' + oldFile + ' -vn ' + newFile + ' -loglevel quiet', error => {
+				if(error) {
+					reject(error);
+				}
+				else {
+					var message = 'successfully converted to ' + convertedAudioType;
+					console.log(message);
+					resolve(message);
+				}
+			})
+		})
 	}
 
-	convertWavToMono() {
-
+	convertWavToMono(oldFile, newFile) {
+		console.log('trying to convert ' + oldFile + ' -> ' + newFile);
+		return new Promise((resolve, reject) => {
+			shell.exec('./services/./ffmpeg -y -i ' + oldFile + ' -ac 1 ' + newFile + ' -loglevel quiet', error => {
+				if(error) {
+					console.log(error);
+					reject(error);
+				}
+				else {
+					var message = 'succesfully converted to mono.' + convertedAudioType;
+					console.log(message);
+					resolve(message);
+				}
+			})
+		})
 	}
 
-	checkFiles(file1, file2, callback) {
-		//console.log('in checkfiles');
-		var flag;
-		if(shell.test('-e', file1)) {
-			flag = true;
-		    shell.rm(file1);
-		}
+	// checkFile(fileName) {
+	// 	console.log('in checkFile -> fileName: ' + fileName);
+	// 	var flag=false;
+	// 	return new Promise((resolve, reject) => {
+	// 		if(shell.test('-e', fileName)) {
+	// 			flag = true;
+	// 	    	shell.rm(fileName);
+	// 		}
+	// 		resolve(fileName);
+	// 	})
+	// }
 
-		if (shell.test('-e', file2)){
-			flag = true;
-		    shell.rm(file2);
-		}
-		// if(flag)
-		// 	return 'One or both of the files already exists! Deleting existing file(s).';
-		// else
-		// 	return 'Neither file exists. Creating new files...';
-		return callback;
-	}
-
+	//JESUS CODE: DO NOT TOUCH
+	//takes base64 audio file and converts it to a binary stream
 	convertDataURIToBinary(dataURI) {
 	  var BASE64_MARKER = ';base64,';	 	
 	  var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;

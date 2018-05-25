@@ -72,15 +72,16 @@ router.post('/audioresponse', (req, res) => {
       return res.json({ success: false, error: error});
     }
     else {
-      //audioconverter.saveAudio(audio);
-      handleAudioService.handleAudio(audio);
+      var filename = 'trial'+ (trialsIndex+1) + '-question' + (questionsIndex+1);
+      handleAudio(audio, filename, subjectId);
       return res.json({ success: true });
     }
   });
 });
 
-
-
+function handleAudio(audio, filename, subjectId) {
+  handleAudioService.handleAudio(audio, filename)
+}
 
 
 function checkAuthentication(req, res, next) {
@@ -431,37 +432,84 @@ router.get('/subjects', (req, res) => {
   });
 });
 
-//saves subject to database
+//save a subject to database
 router.post('/subjects', (req, res) => {
-	const subject = new Subject();
-	const { age, gender, year, religion, ethnicity, testId, testName } = req.body;
-	if(!age || !gender || !year || !ethnicity || !religion) {
-	    res.status(400)
-      return res.json({ success: false, error: 'One or more of the following data are missing: age, gender, year of education, ethnicity, religiosity.' });
-	}
-  else if (!testId || testName) {
+  const subject = new Subject();
+  const { testId, testName } = req.body;
+  if (!testId || !testName) {
       res.status(400);
       return res.json({ success: false, error: 'Error! Both Test Id and Test Name are required!' })
   }
 
-  subject.age = age;
-  subject.gender = gender;
-  subject.year = year;
-  subject.ethnicity = ethnicity;
   subject.testId = testId;
-  subject.religion = religion;
-
   subject.save((error, subject) => {
     if(error){
       res.status(502);
       return res.json({ success: false, error: error})
     }
     else {
-      return res.json({ success: true, subjectId: subject._id });
+      console.log('New subject added to databse!');
+      var path = '/' + testName + '/' + subject._id;
+      dropboxService.createFolder(path)
+      .then(() => {
+        //if successfully saved directory in dropbox, returns true and everything is kosher 
+        console.log("Successfully directory in dropbox at following path: " + path);
+        return res.json({ success: true });
+      })
+      .catch(error => {
+        console.log("Error creating folder in dropbox! Deleting subject in database Please try again.");
+        /*if directroy couldn't be created in dropbox, attempts to delete newly created test from database.
+        we only get to this statement if the test was successfully created in the database.
+        However, if we create the test in the database but couldn't create a corresponding folder in dropbox... 
+        ERRORS WILL OCCUR AND APP WILL IMPLODE!!!
+       
+        So we have to ensure that if for some reason there was an error creating directory in dropbox, that we delete the test from the database!
+        */        
+        Subject.remove({ _id: subject._id }, (error) => {
+          //if for some reason the app couldn't delete the test from database, notify user and HOPEFULLY THEY WILL TAKE CARE OF IT.... (I realize that this is really bad and the user probably won't delete the test, but I have no other options :'(... )
+          if(error){
+            res.status(502);
+            return res.json({ success: false, error: "Warning! Subject was saved to database, but the app could not create corresponding folder in Dropbox! This can lead to errors and the app will implode! Please delete the subject directory in dropbox manually!" });
+          } 
+        });
+      })//catch
     }
-
   });
 });
+
+//subject to database
+//commented out for now
+// router.put('/subjects', (req, res) => {
+// 	const subject = new Subject();
+// 	const { age, gender, year, religion, ethnicity, testId, testName } = req.body;
+// 	if(!age || !gender || !year || !ethnicity || !religion) {
+// 	    res.status(400)
+//       return res.json({ success: false, error: 'One or more of the following data are missing: age, gender, year of education, ethnicity, religiosity.' });
+// 	}
+//   else if (!testId || !testName) {
+//       res.status(400);
+//       return res.json({ success: false, error: 'Error! Both Test Id and Test Name are required!' })
+//   }
+
+//   subject.age = age;
+//   subject.gender = gender;
+//   subject.year = year;
+//   subject.ethnicity = ethnicity;
+//   subject.testId = testId;
+//   subject.religion = religion;
+      
+    //this should probaby be something other than subject.save, probably subject.put or something
+//   subject.save((error, subject) => {
+//     if(error){
+//       res.status(502);
+//       return res.json({ success: false, error: error})
+//     }
+//     else {
+//       return res.json({ success: true, subjectId: subject._id });
+//     }
+
+//   });
+// });
 /************************************************************/
 
 //subjectId: 5aed16a156530645e150e51f

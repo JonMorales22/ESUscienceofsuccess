@@ -74,7 +74,7 @@ class TestDashboard extends Component {
 		    	headers: { "Content-Type": "application/json" },
 		    	body: JSON.stringify({ testName, trials, questions })
 		    })
-		    //first takes response, parses it to json. Second it uses the data
+		    //first takes response, parses it to json. then it uses the data
 			.then(res => res.json()).then((res) => {
 				if(!res.success) { 
 					//this.setState({ error: res.error})
@@ -89,6 +89,38 @@ class TestDashboard extends Component {
 					//make sure we set index
 					this.setState({ tests: data,index: -1 })
 					alert('Test successfully deleted!')
+				};
+			})
+		}
+	}
+
+
+
+	onTakeTest() {
+		if(this.state.tests.length>0&&this.state.index>=0) {
+			let test = this.state.tests[this.state.index];
+			
+			let testId = test._id;
+			let testName = test.name;
+
+			fetch(`/api/subjects`, { 
+				method: 'POST',
+		    	headers: { "Content-Type": "application/json" },
+		    	body: JSON.stringify({ testName, testId  })
+		    })
+		    //first takes response, parses it to json. then it uses the data
+			.then(res => res.json()).then((res) => {
+				if(!res.success) { 
+					//this.setState({ error: res.error})
+					alert(res.error);
+				}
+				else {
+					//removes selected test from this objects state... admittedly I should probably be using MOBx for this, but whatevs
+					// UserStore.setTestId(this.state.tests[this.state.index]._id);
+					// UserStore.setTestName(this.state.tests[this.state.index].name)
+					console.log("Test Id:" + UserStore.testId);
+					console.log("Test Name:" + UserStore.testName);
+					this.setState({ submit: true });
 				};
 			})
 		}
@@ -114,11 +146,7 @@ class TestDashboard extends Component {
 		}
 		//stores necessary info needed to correctly pull test data across different pages/components in UserStore
 		else if(type === 'take-test') {
-			this.setState({ submit: true });
-			UserStore.setTestId(this.state.tests[this.state.index]._id);
-			UserStore.setTestName(this.state.tests[this.state.index].name)
-			console.log("Test Id:" + UserStore.testId);
-			console.log("Test Name:" + UserStore.testName);
+			this.onTakeTest();
 		}
 		else if(type==='logout') {
 			UserStore.logIn();
@@ -224,7 +252,7 @@ class TestDashboard extends Component {
 		else
 			test = [];
 
-		//redirects use to the 1st part of our test, the demographic survey
+		//redirects use to the 1st part of our test
 		if(this.state.submit === true){
 			return <Redirect to='/test' />
 		}

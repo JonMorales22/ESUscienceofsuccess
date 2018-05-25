@@ -24,20 +24,6 @@ const db = {
   dbName: 'esu-science-of-success'
 }
 
-console.log(DB_USER);
-console.log(DB_PASSWORD);
-
-
-// mongoose.connect('mongodb://localhost:27017/', {dbName: 'researchly-test'} ,(error) => {
-// 	if(error) {
-// 		console.error("Couldn't connect to MongoDB!!")
-// 		throw error;
-// 	}
-// 	console.log("Connected to mongodb://localhost:27017/" + db.dbName);
-// })
-// .catch(error => {
-// 	console.log('error: ' + error);
-// })
 
 mongoose.connect('mongodb://' + DB_USER + ':' + DB_PASSWORD + '@ds135540.mlab.com:35540/esu-science-of-success', {dbName: 'esu-science-of-success'} ,(error) => {
 	if(error) {

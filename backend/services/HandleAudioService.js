@@ -4,12 +4,15 @@ import {audioconverter} from './audio-converter.js';
 
 export class HandleAudioService {
 	
-	handleAudio(base64audio) {
-		var test = audioconverter.saveAudio(base64audio);
+	handleAudio(audio, filename) {
+		var test = audioconverter.saveAudio(audio, filename);
 		test
 		.then((result) => {
 			console.log(result);
 			return;
+		})
+		.then(result=> {
+			audioconverter.convertAudio(filename)
 		})
 		.catch(error => {
 			console.log(error);
