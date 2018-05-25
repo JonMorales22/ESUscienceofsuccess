@@ -164,14 +164,14 @@ class TestTaker extends Component {
 			else if( response.hasResponse || response.canSkip) {
 				this.saveResponse();
 				//if we are on question 0,4,8,12,16 then we show the modal
-				// if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
-				// 	this.incrementTrialsIndex();
-				// 	this.openModal();
-				// }
-				// if(this.state.questionsIndex < this.state.questions.length-1) {
-				// 	responseStore.incrementIndex();
-				// 	this.incrementQuestionsIndex();
-				// }
+				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
+					this.incrementTrialsIndex();
+					this.openModal();
+				}
+				if(this.state.questionsIndex < this.state.questions.length-1) {
+					responseStore.incrementIndex();
+					this.incrementQuestionsIndex();
+				}
 			}
 		}
 	}

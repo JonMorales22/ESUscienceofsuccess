@@ -66,7 +66,7 @@ router.post('/audioresponse', (req, res) => {
   response.trialsIndex = trialsIndex;
   response.questionsIndex = questionsIndex;
 
-  response.save(error => {
+  response.save((error, data) => {
     if(error) { 
       res.status(502);
       return res.json({ success: false, error: error});
@@ -74,13 +74,13 @@ router.post('/audioresponse', (req, res) => {
     else {
       var filename = 'trial'+ (trialsIndex+1) + '-question' + (questionsIndex+1);
       let testName = 'exampleTest'; //<----REMOVE LATER
-      handleAudio(audio, filename, testName ,subjectId);
+      handleAudio(audio, filename, testName , subjectId, data._id);
       return res.json({ success: true });
     }
   });
 });
 
-function handleAudio(audio, filename, testName, subjectId) {
+function handleAudio(audio, filename, testName, subjectId, responseId, ) {
 
   handleAudioService.handleAudio(audio, filename)
   .then(convertedAudioFile => {
@@ -95,7 +95,7 @@ function handleAudio(audio, filename, testName, subjectId) {
 
     Promise.all([promise1, promise2]).then(responses => {
 
-      Response.updateOne({ subjectId: subjectId }, {data: responses[0]}, (error, res) => {
+      Response.updateOne({ _id: responseId }, {data: responses[0]}, (error, res) => {
         if(error)
           throw error
         else 
