@@ -208,32 +208,19 @@ router.get('/tests/:testId', (req, res) => {
 router.post('/tests', (req, res, next) => {
   const test = new Test();
   // body parser lets us use the req.body
-  const { name, trials, questions } = req.body;
-  if (!name) {
-    // we should throw an error. we can do this check on the front end
+  const { name, trials, questions, debriefing } = req.body;
+  if (!name || !trials || !questions || !debriefing) {
+    res.status(400);
     return res.json({
       success: false,
-      error: 'You must provide a Test name!'
+      error: 'Please make sure ALL the following information is filled out: test name, trials, questions, and debriefing.'
     });
   }
-  else if (!trials) {
-    // we should throw an error. we can do this check on the front end
-    return res.json({
-      success: false,
-      error: 'You must provide an array of trials!'
-    });
-  }
-  else if (!questions) {
-    // we should throw an error. we can do this check on the front end
-    return res.json({
-      success: false,
-      error: 'You must provide an array of questions!'
-    });
-  }
+
   test.name = name;
   test.trials = trials;
   test.questions = questions;
-
+  test.debriefing = debriefing;
 
   /*this unwieldy statement does the following:
     1. saves a test in the database
