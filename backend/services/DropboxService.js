@@ -11,17 +11,17 @@ export class DropboxService {
 	 	the path should follow the following params:
 		/testName/subjectId/trialNumber-QuestionNumber.wav
 	*/
-	saveAudio(filename,resp) {
+	saveAudio(fileName, path) {
 		console.log('in dropboxservice -> save test');
-
-		var audiofile = fs.readFile(filename, (error,data) => {
+		console.log(path);
+		var audiofile = fs.readFile(fileName, (error,data) => {
 			if(error) {
 				console.log('error:' + error);
 				throw error;
 			}
 			var params = {
 				contents: data,
-				path: '/test2/trial1/subject1/test2.wav',
+				path: path,
 				mode:
 					{
 						'.tag': 'overwrite'

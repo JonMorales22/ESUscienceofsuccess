@@ -73,14 +73,29 @@ router.post('/audioresponse', (req, res) => {
     }
     else {
       var filename = 'trial'+ (trialsIndex+1) + '-question' + (questionsIndex+1);
-      handleAudio(audio, filename, subjectId);
+      let testName = 'exampleTest'; //<----REMOVE LATER
+      handleAudio(audio, filename, testName ,subjectId);
       return res.json({ success: true });
     }
   });
 });
 
-function handleAudio(audio, filename, subjectId) {
+function handleAudio(audio, filename, testName, subjectId) {
+
   handleAudioService.handleAudio(audio, filename)
+  .then(convertedAudioFile => {
+    console.log("returned to routes => handleAudio");
+    console.log(convertedAudioFile);
+    
+    var ass = convertedAudioFile.substring(convertedAudioFile.indexOf('/')+1);
+    //console.log(convertedAudioFile);
+    var path = '/'+ testName + '/' + subjectId + '/' + ass;
+    dropboxService.saveAudio(convertedAudioFile, path);
+    //var promise2 = handleAudioService(convertedAudioFile);
+  })
+  .catch(error => {
+    console.log(error);
+  })
 }
 
 

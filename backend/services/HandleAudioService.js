@@ -1,33 +1,52 @@
 import {dropboxtest} from './dropboxService.js'; 
-import {googlespeech} from './googleService.js';
+import {googleSpeechService} from './googleSpeechService.js';
 import {audioconverter} from './audio-converter.js';
 
 export class HandleAudioService {
-	
+
 	handleAudio(audio, filename) {
-		var test = audioconverter.saveAudio(audio, filename);
-		test
-		.then((result) => {
-			console.log(result);
-			return;
-		})
-		.then(result=> {
-			audioconverter.convertAudio(filename)
-			.then(newFileName => {
-				googlespeech.analyzeSpeech(newFileName)
-				.then(data => {
-					console.log("Audio successfully transcribed!");
-					console.log(data)
-					return;
-				})
+		
+		return new Promise((resolve, reject) => {
+			audioconverter.saveAudio(audio, filename)
+			.then(result => {
+				console.log(result)
 				return;
 			})
-			return;
+			.then(result => {
+				audioconverter.convertAudio(filename)
+				.then(newFileName => {
+					resolve(newFileName);
+				})
+			})
+			.catch(error => {
+				throw error;
+			})
 		})
-		.then()
-		.catch(error => {
-			console.log(error);
-		})
+	}
+		// test
+		// .then((result) => {
+		// 	console.log(result);
+		// 	return;
+		// })
+		// .then(result => {
+		// 	audioconverter.convertAudio(filename)
+		// 	.then(newFileName => {
+		// 		googleSpeechService.analyzeSpeech(newFileName)
+		// 		.then(data => {
+		// 			console.log("Audio successfully transcribed!");
+		// 			console.log(data)
+		// 			return;
+		// 		})
+		// 		return;
+		// 	})
+		// 	return;
+		// })
+		// .catch(error => {
+		// 	console.log(error);
+		// 	throw error;
+		// })
+
+	sendAudioToExternalService(fileName) {
 
 	}
 
