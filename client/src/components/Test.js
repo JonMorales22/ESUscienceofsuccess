@@ -16,7 +16,7 @@ import 'whatwg-fetch';
 
 //creates a response store
 let responseStore = new ResponseStore(20);
-
+let data  = [];
 //FOR DEBUGGING ONLY
 // UserStore.setTestId('5b05d99bd305b68e1847c16e');
 // UserStore.setUserId('5b0406ea63112b5a43062a30');
@@ -65,8 +65,8 @@ class TestTaker extends Component {
 			testname: null,
 			trials: null,
 			questions: null,
-			questionsIndex: 19, //index used to keep track of what question the Subject is currently answering
-			trialsIndex: 4, //index used to keep track of what trial the subject is currently on
+			questionsIndex: 0, //index used to keep track of what question the Subject is currently answering
+			trialsIndex: 0, //index used to keep track of what trial the subject is currently on
 			questionsPerTrial: 0,
 			modalIsOpen: true, //show modal which notifies the Subject what trial they are on
 			data: [],
@@ -115,7 +115,6 @@ class TestTaker extends Component {
 		let subjectId = UserStore.subjectId;
 		let trialsIndex = this.state.trialsIndex;
 		let questionsIndex = this.state.questionsIndex;
-		let data = []
 
 		if(!blob) {
 			console.log('audiofile does not exist!');
@@ -137,14 +136,14 @@ class TestTaker extends Component {
 				else {
 					console.log("Data.transcript = " + res.data.transcript);
 					console.log("Data.latency = " + res.data.latency);
-					console.log("Data.latency = " + res.data.trialsIndex);
-					console.log("Data.latency = " + res.data.questionsIndex);
+					console.log("Data.trialsIndex = " + res.data.trialsIndex);
+					console.log("Data.questionsIndex = " + res.data.questionsIndex);
 
-					let tempData = this.state.data;
-					tempData.push(res.data);
-					this.setState({data: tempData});
-					console.log("In res: " + this.state.testname);
-					this.saveAnalyzedData(tempData);
+					data.push(res.data);
+					if(res.data.questionsIndex===this.state.questions.length-1){
+						console.log("WERE IN IT");
+						this.saveAnalyzedData();
+					}
 				}
 			});
 		});
@@ -153,8 +152,9 @@ class TestTaker extends Component {
 
 	saveAnalyzedData = () => {
 		console.log("attempting to save the analyzed data... => client");
+		console.log("Data to be saved:" + data);
 		let subjectId = UserStore.subjectId;
-		let data = this.state.data;
+		//let data = this.state.data;
 
 		if(!subjectId || !data){
 			console.log("Missing either SubjectId or data => client");
@@ -172,6 +172,7 @@ class TestTaker extends Component {
 			}
 			else {
 				console.log("Data successfully saved...?");
+				this.setState({ submit: true });
 			}
 		});
 
@@ -210,14 +211,14 @@ class TestTaker extends Component {
 			else if( response.hasResponse || response.canSkip) {
 				this.sendDataForAnalysis();
 				//if we are on question 0,4,8,12,16 then we show the modal
-				// if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
-				// 	this.incrementTrialsIndex();
-				// 	this.openModal();
-				// }
-				// if(this.state.questionsIndex < this.state.questions.length-1) {
-				// 	responseStore.incrementIndex();
-				// 	this.incrementQuestionsIndex();
-				// }
+				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
+					this.incrementTrialsIndex();
+					this.openModal();
+				}
+				if(this.state.questionsIndex < this.state.questions.length-1) {
+					responseStore.incrementIndex();
+					this.incrementQuestionsIndex();
+				}
 				// else{
 				// 	this.setState({ submit: true})
 				// }
