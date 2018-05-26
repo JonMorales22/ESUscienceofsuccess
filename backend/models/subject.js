@@ -7,6 +7,7 @@ const SubjectsSchema = new Schema({
 	year: String,
 	ethnicity: String,
 	religion: Number,
+	dropboxURL: String,
 	testId: {type: Schema.Types.ObjectId, ref: 'Test'}
 }, { timestamps: true });
 

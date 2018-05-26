@@ -222,7 +222,6 @@ class TestTaker extends Component {
 				          <button name='modal-button' onClick={this.closeModal}>Okay</button>
 				        </Modal>
 					</div>
-
 					<h1>Scenario {this.state.trialsIndex+1}</h1>
 					<textarea name='trial' rows='10' cols='50' value={this.state.trials[this.state.trialsIndex]} readOnly></textarea>
 

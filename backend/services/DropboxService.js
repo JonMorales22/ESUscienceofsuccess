@@ -3,7 +3,11 @@ var Dropbox = require('dropbox').Dropbox;
 var dbx = new Dropbox({ accessToken: 'tk0SIp3rdvAAAAAAAAAAGD_969WY93_KCvoVQdKx3e-rKpxUTX_gOrwK4MGE28H2'});
 var fs = require('fs');
 
+
 //link to dropboxAPI: http://dropbox.github.io/dropbox-sdk-js/Dropbox.html#filesPropertiesAdd__anchor
+
+const APPNAME = 'Researchly';
+const dropboxURL = 'https://www.dropbox.com/home/Apps/' + APPNAME;
 
 export class DropboxService {
 
@@ -11,6 +15,10 @@ export class DropboxService {
 	 	the path should follow the following params:
 		/testName/subjectId/trialNumber-QuestionNumber.wav
 	*/
+	get dropboxURL() {
+		return dropboxURL;
+	}
+
 	saveAudio(fileName, path) {
 		console.log('in dropboxservice -> save test');
 		console.log(path);

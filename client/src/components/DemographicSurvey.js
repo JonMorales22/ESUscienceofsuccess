@@ -70,12 +70,8 @@ class DemographicSurvey extends Component {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ age, gender, ethnicity, year, religion, testId, testName, subjectId }),
 		})
-		//subject's id should be in the response body, which is saved in UserStore.
 		.then(res => res.json()).then((res) => {
 			if(res.success === true ) {
-				//UserStore.setAnsweredSurvey();
-				//UserStore.setUserId(res.subjectId)
-				//console.log("TestStore.userId: " + UserStore.userId);
 				this.setState({ submit: true });
 			}
 			else if (res.success === false) {
@@ -179,8 +175,8 @@ class DemographicSurvey extends Component {
 							<option value='sophomore'>Sophomore</option>
 							<option value='junior'>Junior</option>
 							<option value='senior'>Senior</option>
-							<option value='bachelor'>Associates</option>
-							<option value='bachelor'>Bachelors</option>
+							<option value='associates'>Associates</option>
+							<option value='bachelors'>Bachelors</option>
 							<option value='masters'>Masters</option>
 							<option value='doctorate'>Doctorate</option>
 							<option value='other'>Other</option>
@@ -190,8 +186,8 @@ class DemographicSurvey extends Component {
 
 						<p>Ethnicity:</p>
 						<select name='ethnicity' value={this.state.ethnicity} onChange={this.handleChange}>
-							<option value='white'>White</option>
-							<option value='black'>Black</option>
+							<option value='white'>White/Caucasian</option>
+							<option value='black'>Black/African American</option>
 							<option value='hispanic/latino'>Hispanic/Latino</option>
 							<option value='asian'>Asian</option>
 							<option value='native american'>Native American</option>
@@ -207,7 +203,6 @@ class DemographicSurvey extends Component {
 							<option value='2'>2</option>
 							<option value='3'>3</option>
 							<option value='4'>4</option>
-							<option value='none'>Prefer not to answer</option>
 						</select>
 						<br/>
 

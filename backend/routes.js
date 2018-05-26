@@ -467,11 +467,23 @@ router.post('/subjects', (req, res) => {
       dropboxService.createFolder(path)
       .then(() => {
         //if successfully saved directory in dropbox, returns true and everything is kosher 
-        console.log("Successfully directory in dropbox at following path: " + path);
+        var URL = dropboxService.dropboxURL + path;
+        console.log("Successfully created folder in dropbox at following URL: " + URL);
+        Subject.findByIdAndUpdate(subject._id, {dropboxURL : URL}, error => {
+          if(error){
+            console.log(error)
+            throw error;
+          }
+          else{
+            console.log("Update subject successfully with dropboxURL!");
+          }
+
+        });
         return res.json({ success: true, subject: subject });
       })
       .catch(error => {
         console.log("Error creating folder in dropbox! Deleting subject in database Please try again.");
+        console.log(error);
         /*if directroy couldn't be created in dropbox, attempts to delete newly created test from database.
         we only get to this statement if the test was successfully created in the database.
         However, if we create the test in the database but couldn't create a corresponding folder in dropbox... 
@@ -513,15 +525,7 @@ router.put('/subjects', (req, res) => {
     testId: testId,
     religion: religion 
   }
-  // subject.age = age;
-  // subject.gender = gender;
-  // subject.year = year;
-  // subject.ethnicity = ethnicity;
-  // subject.testId = testId;
-  // subject.religion = religion;
       
-    //this should probaby be something other than subject.save, probably subject.put or something
-
   Subject.findByIdAndUpdate(subjectId, subjectData, error => {
     if(error) {
       res.status(502)
@@ -532,6 +536,7 @@ router.put('/subjects', (req, res) => {
     }
   })
 });
+
 /************************************************************/
 
 //subjectId: 5aed16a156530645e150e51f
