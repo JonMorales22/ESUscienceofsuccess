@@ -63,7 +63,7 @@
     "test": "node scripts/test.js --env=jsdom",
     "start:server": "cd ../backend && nodemon server.js --exec babel-node --presets es2015,stage-0",
     "start:client": "yarn start",
-    "start:dev": "concurrently \"mongod\" \"yarn start:server\" \"yarn start:client\""
+    "start:dev": "concurrently \"yarn start:server\" \"yarn start:client\""
   },
   "devDependencies": {
     "babel-eslint": "^8.2.3",

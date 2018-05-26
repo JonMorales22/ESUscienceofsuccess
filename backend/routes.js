@@ -15,12 +15,6 @@ var router = express.Router();
 
 //var dropboxService = require('/Users/jonathanmorales/documents/projects/MERN/researchly-ejected/backend/services/dropboxAPI');
 
-
-//var dropbox = require('');
-
-//var passport = require('passport');
-
-
 //DEBUGGING ONLY
 router.put('/updateSubjects', (req,res) => {
   console.log('router get /updateSubjects')
@@ -579,17 +573,11 @@ router.post('/responses', (req, res) => {
         error: 'Must provide a question index!'
       });
   }
-  // else if (!data) {
-  //     return res.json({
-  //       success: false,
-  //       error: 'Must provide data!'
-  //     });
-  // }
+
   response.subjectId = subjectId;
   response.testId = testId;
   response.trialsIndex = trialsIndex;
   response.questionsIndex = questionsIndex;
-  //response.data = data;
   response.save(error => {
     if(error) return res.json({ success: false, error: error});
     return res.json({ success: true });
