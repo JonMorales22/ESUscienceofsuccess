@@ -28,6 +28,7 @@ class TestCreator extends Component {
       numQuest: 4,  //hardcoded at 4 for right now, later we'll figure out how to make this dynamic
       trials: trialsArr, //dummy placeholder our trials states, when the user fills in the trials questions the state will update
       questions: questsArr, //same idea as above, but this changes the questions state
+      debriefing: '',
       error: null,
       submit: false,
       viewOnly: false
@@ -170,6 +171,9 @@ class TestCreator extends Component {
      stateCopy.questions[index] = text;
      this.setState(stateCopy)
     }
+    else if(type=='debriefing') {
+      this.setState({ debriefing: text });
+    }
   }
   /*
     handleSubmit
@@ -179,19 +183,19 @@ class TestCreator extends Component {
   */
   handleSubmit(event) {
     event.preventDefault();
-    const { name, trials, questions } = this.state; 
+    const { name, trials, questions, debriefing } = this.state; 
     //first make sure user is logged in and authorized to create a test
     if(!UserStore.isLoggedIn)
       return(alert("Test not saved. Please login to save a test."));
     //makes sure all relevant data is filled in
-    if(!name || !trials || !questions) {
-      console.log("Must input a test name and fill out all trials and questions!")
+    if(!name || !trials || !questions || !debriefing) {
+      alert("Please make sure all the following are filled in: test name, all trial forms, all question forms, debriefing form");
       return;
     }
     fetch('/api/tests', {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, trials, questions }),
+      body: JSON.stringify({ name, trials, questions, debriefing }),
     })
     .then(res => res.json()).then((res) => {
       console.log(res);
@@ -237,6 +241,12 @@ class TestCreator extends Component {
             <div className="trials-holder">
               {forms}
             </div>
+
+            <div className='debriefing-holder'>
+              <h3>Debriefing:</h3>
+              <textarea name='debriefing' rows='20' cols='75' type="text" value={this.state.debriefing} onChange={this.handleInputChange.bind(this,null)}></textarea>
+            </div>
+            
             <input type='submit' value='Save Test'/>
           </form>
       </div>

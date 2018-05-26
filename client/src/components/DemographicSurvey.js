@@ -63,7 +63,7 @@ class DemographicSurvey extends Component {
 			return;
 		}
 		else if(!testId || !testName || !subjectId) {
-			alert("Oops! TestId or testName doesn't exist! Something went wrong, please return to dashboard and try again.");
+			alert("Oops! Something went wrong! TestId or testName doesn't exist!");
 		}
 		fetch('api/subjects', {
 			method: 'PUT',

@@ -86,12 +86,6 @@ export class AudioRecorder extends Component {
 					<button onClick={this.startRecording} type='button'>Start Recording</button>
 					<button onClick={this.stopRecording} type='button'>Stop Recording</button>
 				</div>
-				<div>
-					<AudioPlayer source={this.state.audiofile.blobURL}/>
-				</div>
-				<div>
-					<h3>Latency: {this.state.latency}</h3>
-				</div>
 			</div>
 		)
 	}

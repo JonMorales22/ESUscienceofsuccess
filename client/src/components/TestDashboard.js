@@ -192,13 +192,14 @@ class TestDashboard extends Component {
 	renderSingleTest(index) {
 		//our JSX sandwich buns
 		let trialsForms = [];
-
-		//firs we make sure User has selected a test
+		let debriefing;
+		//first we make sure User has selected a test
 		if(index >= 0) {
 			//I place all data in placeholder variables, I think it makes it easier to read the code.
 			let test = this.state.tests[index];
 			let trials = test.trials;
 			let questions = test.questions;
+			debriefing = test.debriefing;
 			let maxRows = 4;
 
 			//we put the test title on first, think of this as an olive or something... idk lol
@@ -239,6 +240,13 @@ class TestDashboard extends Component {
 		      )
 		    }
 		}
+
+		trialsForms.push(
+			<div className='debriefing'>
+				<h3>Debriefing:</h3>
+				 <textarea name='debriefing' rows='20' cols='75' type="text" value={debriefing} readOnly></textarea>
+			</div>
+		)
 
 		return trialsForms
 	}
