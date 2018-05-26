@@ -8,6 +8,7 @@ const SubjectsSchema = new Schema({
 	ethnicity: String,
 	religion: Number,
 	dropboxURL: String,
+	responses: [{ transcript: String, latency: Number }],
 	testId: {type: Schema.Types.ObjectId, ref: 'Test'}
 }, { timestamps: true });
 

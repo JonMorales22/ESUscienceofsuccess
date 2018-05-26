@@ -38,6 +38,25 @@ router.get('/', function(req, res){
   res.render('index')
 });
 
+router.post('saveaudioresponse', (req, res) => {
+  const { subjectId, data } = req.body;
+
+  if(!subjectId || !data) {
+    res.status(400);
+    return res.json({ success: false, error: "No subjectId or data detected in request body!" });
+  }
+
+  Subject.findByIdAndUpdate(subjectId, {responses: data }, error => {
+    if(error) {
+      res.status(500);
+      return res.json({ success: false, error: error})
+    }
+    else {
+      return res.json({ success: true });
+    }
+  })
+})
+
 router.post('/audioresponse', (req, res) => {
   const { subjectId, testId, testName, trialsIndex , questionsIndex, audio } = req.body;
   const response = new Response();
@@ -53,52 +72,65 @@ router.post('/audioresponse', (req, res) => {
   response.trialsIndex = trialsIndex;
   response.questionsIndex = questionsIndex;
 
-  response.save((error, data) => {
-    if(error) { 
-      res.status(502);
-      return res.json({ success: false, error: error});
-    }
-    else {
-      var filename = subjectId + '/trial' + (trialsIndex) + '-question' + (questionsIndex);
-      handleAudio(audio, filename, testName, subjectId, data._id);
-      return res.json({ success: true });
-    }
-  });
-});
-
-function handleAudio(audio, filename, testName, subjectId, responseId ) {
-  console.log("handleAudio -> filename: " + filename);
-  handleAudioService.handleAudio(audio, filename)
-  .then(convertedAudioFile => {
-    console.log("returned to routes => handleAudio");
-    console.log(convertedAudioFile);
-    
-    var ass = convertedAudioFile.substring(convertedAudioFile.indexOf('/')+1);
-    //console.log(convertedAudioFile);
-    var path = '/'+ testName + '/' + subjectId + '/' + ass;
-    var promise1 = handleAudioService.sendAudioToExternalService(convertedAudioFile);
-    var promise2 = dropboxService.saveAudio(convertedAudioFile, path);
-
-    Promise.all([promise1, promise2]).then(responses => {
-
-      Response.updateOne({ _id: responseId }, {data: responses[0]}, (error, res) => {
-        if(error)
-          throw error
-        else {
-          handleAudioService.deleteFile(convertedAudioFile);
-          console.log(res);
-        }
-      })
-
-      console.log(responses[0]);
-      console.log(responses[1]);
-    })
+  var filename = subjectId + '/trial' + (trialsIndex) + '-question' + (questionsIndex);
+  handleAudio(audio, filename, testName, subjectId)
+  .then(googleData => {
+    res.json({ success: true, data: googleData});
   })
   .catch(error => {
     console.log(error);
+    return res.json({ success: false, error: error });
+  })
+
+  // response.save((error, data) => {
+  //   if(error) { 
+  //     res.status(502);
+  //     return res.json({ success: false, error: error});
+  //   }
+  //   else {
+  //     var filename = subjectId + '/trial' + (trialsIndex) + '-question' + (questionsIndex);
+  //     handleAudio(audio, filename, testName, subjectId, data._id);
+  //     return res.json({ success: true });
+  //   }
+  // });
+});
+
+function handleAudio(audio, filename, testName, subjectId) {
+  console.log("handleAudio -> filename: " + filename);
+
+  return new Promise((resolve, reject) => {
+    handleAudioService.handleAudio(audio, filename)
+    .then(convertedAudioFile => {
+      console.log("returned to routes => handleAudio");
+      console.log(convertedAudioFile);
+      
+      var ass = convertedAudioFile.substring(convertedAudioFile.indexOf('/')+1);
+      //console.log(convertedAudioFile);
+      var path = '/'+ testName + '/' + subjectId + '/' + ass;
+      var promise1 = handleAudioService.sendAudioToExternalService(convertedAudioFile);
+      var promise2 = dropboxService.saveAudio(convertedAudioFile, path);
+
+      Promise.all([promise1, promise2]).then(responses => {
+        console.log(responses[0]);
+        console.log(responses[1]);
+        handleAudioService.deleteFile(convertedAudioFile);
+        resolve(responses[0]);
+      })
+    })
+    .catch(error => {
+      reject(error);
+    })  
   })
 }
 
+        // Response.updateOne({ _id: responseId }, {data: responses[0]}, (error, res) => {
+        //   if(error)
+        //     throw error
+        //   else {
+        //     handleAudioService.deleteFile(convertedAudioFile);
+        //     console.log(res);
+        //   }
+        // })
 
 function checkAuthentication(req, res, next) {
   const {username, password } = req.body;

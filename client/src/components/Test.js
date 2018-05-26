@@ -131,11 +131,18 @@ class TestTaker extends Component {
 				body: JSON.stringify({ subjectId, testId, testName, trialsIndex, questionsIndex, audio })
 			})
 			.then(res => res.json()).then((res) => {
-				console.log(res);
-				let tempData = this.state.data;
-				tempData.push({transcript: 'test test test', latency: .4});
-				this.setState({data: tempData});
-				console.log("In res: " + this.state.testname);
+				if(res.success === false) {
+					console.log("error");
+				}
+				else {
+					console.log("Data.transcript = " + res.data.transcript);
+					console.log("Data.latency = " + res.data.latency);
+
+					let tempData = this.state.data;
+					tempData.push(res.data);
+					this.setState({data: tempData});
+					console.log("In res: " + this.state.testname);
+				}
 			});
 		});
 		reader.readAsDataURL(blob);
