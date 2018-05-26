@@ -69,6 +69,7 @@ class TestTaker extends Component {
 			trialsIndex: 0, //index used to keep track of what trial the subject is currently on
 			questionsPerTrial: 0,
 			modalIsOpen: true, //show modal which notifies the Subject what trial they are on
+			data: [],
 			submit: false
 		});
 		this.handleClick = this.handleClick.bind(this);
@@ -114,13 +115,14 @@ class TestTaker extends Component {
 		let subjectId = UserStore.subjectId;
 		let trialsIndex = this.state.trialsIndex;
 		let questionsIndex = this.state.questionsIndex;
+		let data = []
 
 		if(!blob) {
 			console.log('audiofile does not exist!');
 			return;
 		}
 		var reader = new FileReader();
-		reader.addEventListener('loadend', function() {
+		reader.addEventListener('loadend', () => {
 			let audio = reader.result;
 			//base64 = base64.substr(base64.indexOf(',')+1);
 			fetch('/api/audioresponse', {
@@ -130,9 +132,17 @@ class TestTaker extends Component {
 			})
 			.then(res => res.json()).then((res) => {
 				console.log(res);
+				let tempData = this.state.data;
+				tempData.push({transcript: 'test test test', latency: .4});
+				this.setState({data: tempData});
+				console.log("In res: " + this.state.testname);
 			});
 		});
 		reader.readAsDataURL(blob);
+	}
+
+	performAsycnStuff = () => {
+
 	}
 
 	//
@@ -167,17 +177,17 @@ class TestTaker extends Component {
 			else if( response.hasResponse || response.canSkip) {
 				this.saveResponse();
 				//if we are on question 0,4,8,12,16 then we show the modal
-				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
-					this.incrementTrialsIndex();
-					this.openModal();
-				}
-				if(this.state.questionsIndex < this.state.questions.length-1) {
-					responseStore.incrementIndex();
-					this.incrementQuestionsIndex();
-				}
-				else{
-					this.setState({ submit: true})
-				}
+				// if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
+				// 	this.incrementTrialsIndex();
+				// 	this.openModal();
+				// }
+				// if(this.state.questionsIndex < this.state.questions.length-1) {
+				// 	responseStore.incrementIndex();
+				// 	this.incrementQuestionsIndex();
+				// }
+				// else{
+				// 	this.setState({ submit: true})
+				// }
 			}
 		}
 	}

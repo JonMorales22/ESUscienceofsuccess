@@ -5,9 +5,9 @@ import { observable, action } from "mobx";
 export class UserStore {
 	@observable isLoggedIn = false;
 	@observable answeredSurvey = false;
-	@observable subjectId = '';
-	@observable testId = '';
-	@observable testName = '';
+	@observable subjectId = '5b09ce69bafb62293dc97b20';
+	@observable testId = '5b09ce59bafb62293dc97b1f';
+	@observable testName = 'newTest';
 	
 
 	@action.bound
