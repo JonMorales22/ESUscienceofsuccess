@@ -65,8 +65,8 @@ class TestTaker extends Component {
 			testname: null,
 			trials: null,
 			questions: null,
-			questionsIndex: 19, //index used to keep track of what question the Subject is currently answering
-			trialsIndex: 4, //index used to keep track of what trial the subject is currently on
+			questionsIndex: 0, //index used to keep track of what question the Subject is currently answering
+			trialsIndex: 0, //index used to keep track of what trial the subject is currently on
 			questionsPerTrial: 0,
 			modalIsOpen: true, //show modal which notifies the Subject what trial they are on
 			submit: false
@@ -111,7 +111,7 @@ class TestTaker extends Component {
 
 		let testId = UserStore.testId;
 		let testName = UserStore.testName;
-		let subjectId = UserStore.userId;
+		let subjectId = UserStore.subjectId;
 		let trialsIndex = this.state.trialsIndex;
 		let questionsIndex = this.state.questionsIndex;
 
@@ -165,7 +165,7 @@ class TestTaker extends Component {
 				//responseStore.setSkip();
 			}
 			else if( response.hasResponse || response.canSkip) {
-				//this.saveResponse();
+				this.saveResponse();
 				//if we are on question 0,4,8,12,16 then we show the modal
 				if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
 					this.incrementTrialsIndex();

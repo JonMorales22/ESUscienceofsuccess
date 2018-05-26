@@ -113,12 +113,10 @@ class TestDashboard extends Component {
 					alert(res.error);
 				}
 				else {
-					//removes selected test from this objects state... admittedly I should probably be using MOBx for this, but whatevs
-					// UserStore.setTestId(this.state.tests[this.state.index]._id);
-					// UserStore.setTestName(this.state.tests[this.state.index].name)
-
-					//TEST THIS OUT LATER!! IT SHOULD WORK, BUT I DIDN'T TEST IT!!!!
-					//UserStore.setSubjectId(res.subject._id);
+					UserStore.setTestId(this.state.tests[this.state.index]._id);
+					UserStore.setTestName(this.state.tests[this.state.index].name)
+					UserStore.setSubjectId(res.subject._id);
+					
 					console.log("Test Id:" + UserStore.testId);
 					console.log("Test Name:" + UserStore.testName);
 					this.setState({ submit: true });
