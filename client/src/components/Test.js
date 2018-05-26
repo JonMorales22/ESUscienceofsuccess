@@ -65,8 +65,8 @@ class TestTaker extends Component {
 			testname: null,
 			trials: null,
 			questions: null,
-			questionsIndex: 0, //index used to keep track of what question the Subject is currently answering
-			trialsIndex: 0, //index used to keep track of what trial the subject is currently on
+			questionsIndex: 19, //index used to keep track of what question the Subject is currently answering
+			trialsIndex: 4, //index used to keep track of what trial the subject is currently on
 			questionsPerTrial: 0,
 			modalIsOpen: true, //show modal which notifies the Subject what trial they are on
 			data: [],
@@ -103,7 +103,7 @@ class TestTaker extends Component {
 	}
 
 	//saves our AudioResponse data to DB
-	saveResponse = () => {
+	sendDataForAnalysis = () => {
 		let index = responseStore.index;
 		let response = responseStore.responses[index];
 		let audiofile = response.audiofile;
@@ -137,18 +137,44 @@ class TestTaker extends Component {
 				else {
 					console.log("Data.transcript = " + res.data.transcript);
 					console.log("Data.latency = " + res.data.latency);
+					console.log("Data.latency = " + res.data.trialsIndex);
+					console.log("Data.latency = " + res.data.questionsIndex);
 
 					let tempData = this.state.data;
 					tempData.push(res.data);
 					this.setState({data: tempData});
 					console.log("In res: " + this.state.testname);
+					this.saveAnalyzedData(tempData);
 				}
 			});
 		});
 		reader.readAsDataURL(blob);
 	}
 
-	performAsycnStuff = () => {
+	saveAnalyzedData = () => {
+		console.log("attempting to save the analyzed data... => client");
+		let subjectId = UserStore.subjectId;
+		let data = this.state.data;
+
+		if(!subjectId || !data){
+			console.log("Missing either SubjectId or data => client");
+			return;
+		}
+
+		fetch('/api/saveaudioresponse', {
+			method: 'POST',
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ subjectId, data })
+		})
+		.then(res => res.json()).then((res) => {
+			if(res.success === false) {
+				console.log("error");
+			}
+			else {
+				console.log("Data successfully saved...?");
+			}
+		});
+
 
 	}
 
@@ -182,7 +208,7 @@ class TestTaker extends Component {
 				//responseStore.setSkip();
 			}
 			else if( response.hasResponse || response.canSkip) {
-				this.saveResponse();
+				this.sendDataForAnalysis();
 				//if we are on question 0,4,8,12,16 then we show the modal
 				// if(this.state.questionsIndex % this.state.questionsPerTrial === 3 && this.state.trialsIndex < this.state.trials.length-1) {
 				// 	this.incrementTrialsIndex();

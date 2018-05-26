@@ -38,7 +38,7 @@ router.get('/', function(req, res){
   res.render('index')
 });
 
-router.post('saveaudioresponse', (req, res) => {
+router.post('/saveaudioresponse', (req, res) => {
   const { subjectId, data } = req.body;
 
   if(!subjectId || !data) {
@@ -75,6 +75,8 @@ router.post('/audioresponse', (req, res) => {
   var filename = subjectId + '/trial' + (trialsIndex) + '-question' + (questionsIndex);
   handleAudio(audio, filename, testName, subjectId)
   .then(googleData => {
+    googleData.trialsIndex = trialsIndex;
+    googleData.questionsIndex = questionsIndex;
     res.json({ success: true, data: googleData});
   })
   .catch(error => {
