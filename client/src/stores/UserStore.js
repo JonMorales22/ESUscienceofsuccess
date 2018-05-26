@@ -3,7 +3,7 @@ import { observable, action } from "mobx";
 //FOR DEBUGGING ONLY
 
 export class UserStore {
-	@observable isLoggedIn = true;
+	@observable isLoggedIn = false;
 	@observable answeredSurvey = false;
 	@observable subjectId = '';
 	@observable testId = '';
