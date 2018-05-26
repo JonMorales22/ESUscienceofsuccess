@@ -2,10 +2,11 @@ import {dropboxtest} from './dropboxService.js';
 import {googleSpeechService} from './googleSpeechService.js';
 import {audioconverter} from './audio-converter.js';
 
+var shell = require('shelljs');
+
 export class HandleAudioService {
 
 	handleAudio(audio, filename) {
-		
 		return new Promise((resolve, reject) => {
 			audioconverter.saveAudio(audio, filename)
 			.then(result => {
@@ -23,28 +24,18 @@ export class HandleAudioService {
 			})
 		})
 	}
-		// test
-		// .then((result) => {
-		// 	console.log(result);
-		// 	return;
-		// })
-		// .then(result => {
-		// 	audioconverter.convertAudio(filename)
-		// 	.then(newFileName => {
-		// 		googleSpeechService.analyzeSpeech(newFileName)
-		// 		.then(data => {
-		// 			console.log("Audio successfully transcribed!");
-		// 			console.log(data)
-		// 			return;
-		// 		})
-		// 		return;
-		// 	})
-		// 	return;
-		// })
-		// .catch(error => {
-		// 	console.log(error);
-		// 	throw error;
-		// })
+
+	deleteFile(fileName) {
+		console.log('deleting file from disk: ' + fileName);
+		var flag=false;
+		return new Promise((resolve, reject) => {
+			if(shell.test('-e', fileName)) {
+				flag = true;
+		    	shell.rm(fileName);
+			}
+			resolve(fileName);
+		})
+	}
 
 	sendAudioToExternalService(fileName) {
 		return new Promise((resolve, reject) => {

@@ -22,7 +22,6 @@ const convertedAudioType = '.wav'
 
 export class audioConverter {
 
-
 	/*
 		saveAudio
 			takes in an audio file encoded in base64, converts it to binary, and then converts it to webm,
@@ -38,14 +37,25 @@ export class audioConverter {
 	saveAudio(base64Audio, fileName) {
 		console.log('Attempting to save ' + fileName + ' to disk...');
 		var newFileName = directory + fileName + originalAudioType;
+		
+		var mkdir = fileName.substring(0,fileName.indexOf('/'));
+		mkdir = directory + mkdir
+
+		shell.mkdir('-p', mkdir);
+
+		console.log("mkdir:" + mkdir);
+		console.log("newFileName: " + newFileName);
+
 		//blocking may occur here in this function call... idk how quickly the base64 webmfile can be converted to binary data
 		var audio = this.convertDataURIToBinary(base64Audio); 
 		
 		return new Promise(function(resolve, reject) {
 			//save file to disk, if error occurs abandon all hope
 			fs.writeFile(newFileName, audio, (err,res) => {
-				if(err) 
+				if(err) {
+					console.log("writeFile -> " + err)
 					reject(err);
+				} 
 				else {
 					console.log(fileName + ' successfully saved to disk with following name: ' + newFileName)
 					resolve(newFileName);
@@ -77,53 +87,14 @@ export class audioConverter {
 				}
 				else {
 					var message = 'successfully converted to ' + convertedAudioType;
+					console.log('deleting file from disk: ' + oldAudioFile);
+					shell.rm(oldAudioFile);
 					console.log(message);
 					resolve(newAudioFile);
 				}
 			})
 		})
 	}
-
-	/*
-		convertToWav
-			this method is very similar to convertToWavMono, the only difference is in the shell.js call. 
-			I could have merged the 2 methods into one, and set a flag which would determine whether to make the audio 
-		params:
-			oldFile - 
-			newFile - 
-	// */
-	// convertToWav(oldFile, newFile) {
-	// 	console.log('trying to convert ' + oldFile + ' -> ' + newFile);
-	// 	return new Promise((resolve, reject) => {
-	// 		shell.exec('./services/./ffmpeg -y -i ' + oldFile + ' -vn  -ac 1 ' + newFile + ' -loglevel quiet', error => {
-	// 			if(error) {
-	// 				reject(error);
-	// 			}
-	// 			else {
-	// 				var message = 'successfully converted to ' + convertedAudioType;
-	// 				console.log(message);
-	// 				resolve(message);
-	// 			}
-	// 		})
-	// 	})
-	// }
-
-	// convertWavToMono(oldFile, newFile) {
-	// 	console.log('trying to convert ' + oldFile + ' -> ' + newFile);
-	// 	return new Promise((resolve, reject) => {
-	// 		shell.exec('./services/./ffmpeg -y -i ' + oldFile + ' -ac 1 ' + newFile + ' -loglevel quiet', error => {
-	// 			if(error) {
-	// 				console.log(error);
-	// 				reject(error);
-	// 			}
-	// 			else {
-	// 				var message = 'succesfully converted to mono.' + convertedAudioType;
-	// 				console.log(message);
-	// 				resolve(message);
-	// 			}
-	// 		})
-	// 	})
-	// }
 
 	// checkFile(fileName) {
 	// 	console.log('in checkFile -> fileName: ' + fileName);
@@ -136,6 +107,7 @@ export class audioConverter {
 	// 		resolve(fileName);
 	// 	})
 	// }
+
 
 	//JESUS CODE: DO NOT TOUCH
 	//takes base64 audio file and converts it to a binary stream

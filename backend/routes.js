@@ -7,13 +7,11 @@ import Response from './models/response';
 import passport from './passport-config';
 import {handleAudioService} from './services/HandleAudioService.js';
 import {dropboxService} from './services/DropboxService.js';
-//dropbox.saveTest();
 
 var fs = require('fs');
 var express = require('express');
 var router = express.Router();
 
-//var dropboxService = require('/Users/jonathanmorales/documents/projects/MERN/researchly-ejected/backend/services/dropboxAPI');
 
 //DEBUGGING ONLY
 router.put('/updateSubjects', (req,res) => {
@@ -44,11 +42,6 @@ router.post('/audioresponse', (req, res) => {
   const { subjectId, testId, testName, trialsIndex , questionsIndex, audio } = req.body;
   const response = new Response();
 
-  console.log("subjectId:" + subjectId);
-  console.log("testId:" + testId);
-  console.log("trialsIndex:" + trialsIndex);
-  console.log("questionsIndex:" + questionsIndex);
-
   //!trialsIndex returns true when trialsIndex = 0, same for questionsIndex... therefore I used this ugly syntax 
   if(!subjectId || !testId || !testName ||!audio || trialsIndex === null || questionsIndex === null ) {
     res.status(400);
@@ -66,15 +59,15 @@ router.post('/audioresponse', (req, res) => {
       return res.json({ success: false, error: error});
     }
     else {
-      var filename = 'trial'+ (trialsIndex) + '-question' + (questionsIndex);
-      handleAudio(audio, filename, testName , subjectId, data._id);
+      var filename = subjectId + '/trial' + (trialsIndex) + '-question' + (questionsIndex);
+      handleAudio(audio, filename, testName, subjectId, data._id);
       return res.json({ success: true });
     }
   });
 });
 
-function handleAudio(audio, filename, testName, subjectId, responseId, ) {
-
+function handleAudio(audio, filename, testName, subjectId, responseId ) {
+  console.log("handleAudio -> filename: " + filename);
   handleAudioService.handleAudio(audio, filename)
   .then(convertedAudioFile => {
     console.log("returned to routes => handleAudio");
@@ -91,8 +84,10 @@ function handleAudio(audio, filename, testName, subjectId, responseId, ) {
       Response.updateOne({ _id: responseId }, {data: responses[0]}, (error, res) => {
         if(error)
           throw error
-        else 
+        else {
+          handleAudioService.deleteFile(convertedAudioFile);
           console.log(res);
+        }
       })
 
       console.log(responses[0]);
@@ -583,9 +578,6 @@ router.post('/responses', (req, res) => {
     return res.json({ success: true });
   });
 });
-
-//USING THIS FOR TESTING
-
 
 /*************************************************************/
 
