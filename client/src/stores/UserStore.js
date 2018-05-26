@@ -5,24 +5,24 @@ import { observable, action } from "mobx";
 export class UserStore {
 	@observable isLoggedIn = true;
 	@observable answeredSurvey = false;
-	@observable subjectId = '5b08e157c01d1b407cba1902';
-	@observable testId = '5b08e14ec01d1b407cba1901';
-	@observable testName = 'exampleTest';
+	@observable subjectId = '';
+	@observable testId = '';
+	@observable testName = '';
 	
 
 	@action.bound
 	setSubjectId(subjectId) {
-		//this.subjectId = subjectId;
+		this.subjectId = subjectId;
 	}
 
 	@action.bound
 	setTestId(testId) {
-		//this.testId = testId; 
+		this.testId = testId; 
 	}
 
 	@action.bound
 	setTestName(testName) {
-		//this.testName = testName;
+		this.testName = testName;
 	}
 
 	@action.bound
