@@ -10,6 +10,7 @@ class ResponseStore {
 				hasResponse: false,
 				canSkip: false,
 				audiofile: null,
+				timeToStartRecord: -1,
 			});
 	}
 
@@ -33,6 +34,11 @@ class ResponseStore {
 	@action.bound
 	setAudiofile(audiofile) {
 		this.responses[this.index].audiofile = audiofile;
+	}
+
+	@action.bound
+	setTimeToStartRecord(timeToStartRecord) {
+		this.responses[this.index].timeToStartRecord = timeToStartRecord;
 	}
 }
 

@@ -108,13 +108,15 @@ class TestTaker extends Component {
 		let response = responseStore.responses[index];
 		let audiofile = response.audiofile;
 		let blob = audiofile.blob;
-		let blobURL = audiofile.blobURL;
+		let timeToStartRecord = response.timeToStartRecord;
 
 		let testId = UserStore.testId;
 		let testName = UserStore.testName;
 		let subjectId = UserStore.subjectId;
+		
 		let trialsIndex = this.state.trialsIndex;
 		let questionsIndex = this.state.questionsIndex;
+
 
 		if(!blob) {
 			console.log('audiofile does not exist!');
@@ -127,11 +129,11 @@ class TestTaker extends Component {
 			fetch('/api/audioresponse', {
 				method: 'POST',
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ subjectId, testId, testName, trialsIndex, questionsIndex, audio })
+				body: JSON.stringify({ subjectId, testId, testName, timeToStartRecord, trialsIndex, questionsIndex, audio })
 			})
 			.then(res => res.json()).then((res) => {
 				if(res.success === false) {
-					console.log("error");
+					console.log(res.error);
 				}
 				else {
 					console.log("Data.transcript = " + res.data.transcript);

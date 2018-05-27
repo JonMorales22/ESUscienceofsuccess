@@ -58,43 +58,33 @@ router.post('/saveaudioresponse', (req, res) => {
 })
 
 router.post('/audioresponse', (req, res) => {
-  const { subjectId, testId, testName, trialsIndex , questionsIndex, audio } = req.body;
+  const { subjectId, testId, testName, trialsIndex , questionsIndex, audio, timeToStartRecord } = req.body;
   const response = new Response();
 
   //!trialsIndex returns true when trialsIndex = 0, same for questionsIndex... therefore I used this ugly syntax 
-  if(!subjectId || !testId || !testName ||!audio || trialsIndex === null || questionsIndex === null ) {
+  if(!subjectId || !testId || !testName ||!audio || !timeToStartRecord || trialsIndex === null || questionsIndex === null ) {
     res.status(400);
-    return res.json({ success: false, error: 'Missing one or more of the following: subjectId, testId, trialIndex, questionIndex, audio.'})
+    return res.json({ success: false, error: 'Missing one or more of the following: subjectId, testId, trialIndex, questionIndex, startTime, audio.'})
   } 
 
   response.subjectId = subjectId;
   response.testId = testId;
   response.trialsIndex = trialsIndex;
   response.questionsIndex = questionsIndex;
+  response.startTime = timeToStartRecord
 
   var filename = subjectId + '/trial' + (trialsIndex) + '-question' + (questionsIndex);
   handleAudio(audio, filename, testName, subjectId)
   .then(googleData => {
     googleData.trialsIndex = trialsIndex;
     googleData.questionsIndex = questionsIndex;
+    googleData.startTime = timeToStartRecord;
     res.json({ success: true, data: googleData});
   })
   .catch(error => {
     console.log(error);
     return res.json({ success: false, error: error });
   })
-
-  // response.save((error, data) => {
-  //   if(error) { 
-  //     res.status(502);
-  //     return res.json({ success: false, error: error});
-  //   }
-  //   else {
-  //     var filename = subjectId + '/trial' + (trialsIndex) + '-question' + (questionsIndex);
-  //     handleAudio(audio, filename, testName, subjectId, data._id);
-  //     return res.json({ success: true });
-  //   }
-  // });
 });
 
 function handleAudio(audio, filename, testName, subjectId) {
@@ -107,7 +97,6 @@ function handleAudio(audio, filename, testName, subjectId) {
       console.log(convertedAudioFile);
       
       var ass = convertedAudioFile.substring(convertedAudioFile.indexOf('/')+1);
-      //console.log(convertedAudioFile);
       var path = '/'+ testName + '/' + subjectId + '/' + ass;
       var promise1 = handleAudioService.sendAudioToExternalService(convertedAudioFile);
       var promise2 = dropboxService.saveAudio(convertedAudioFile, path);
@@ -125,14 +114,6 @@ function handleAudio(audio, filename, testName, subjectId) {
   })
 }
 
-        // Response.updateOne({ _id: responseId }, {data: responses[0]}, (error, res) => {
-        //   if(error)
-        //     throw error
-        //   else {
-        //     handleAudioService.deleteFile(convertedAudioFile);
-        //     console.log(res);
-        //   }
-        // })
 
 function checkAuthentication(req, res, next) {
   const {username, password } = req.body;
@@ -158,11 +139,6 @@ function checkAuthentication(req, res, next) {
 }
 
 /**************** LOGIN ROUTES API ************************/
-// router.post('/login', (req,res) => {
-//   let user = User.findOne({});
-//   let data = user.validatePassword("@esu2018");
-//   return res.json({ success: true, data: data});
-// })
 
 //saves a new user in db
 passport.initialize();
@@ -177,14 +153,6 @@ router.post('/register', (req,res) => {
     return res.json({ success: true });
   });
 })
-
-// router.get('/checkauth', checkAuthentication,(req,res, next) => {
-//   return res.json({ success: true });
-// })
-
-// router.post('/login', function(req, res) {
-
-// });
 
 router.post('/login', 
   passport.authenticate('local', {failureRedirect: 'login'}),

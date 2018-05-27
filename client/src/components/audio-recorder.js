@@ -5,12 +5,15 @@ import recordIcon from '../assets/record-icon.png';
 
 let initialState = ({
 	record: false,
-	latency: -1,
+	timeToStartRecord: -1,
 	audiofile: {
 		blob: null,
 		blobURL: 'test',
 	}
 });
+
+let startTime;
+let endTime;
 
 @observer
 export class AudioRecorder extends Component {
@@ -23,20 +26,21 @@ export class AudioRecorder extends Component {
 	}
 
 	componentDidMount() {
-		this.startTime = new Date();
-		console.log("Start Time: " + this.startTime);
+		startTime = new Date();
+		console.log("Start Time: " + startTime);
 	}
 
 	startRecording() {
-		this.endTime = new Date();
-		let latency = -1;
-		if(this.state.latency < 0) {
-			latency = this.findLatency(this.startTime, this.endTime);
-			this.setState({ latency: latency });
+		endTime = new Date();
+		let timeToStartRecord = -1;
+		if(this.state.timeToStartRecord < 0) {
+			timeToStartRecord = this.findtimeToStartRecord(startTime, endTime);
+			this.setState({ timeToStartRecord: timeToStartRecord });
 		}
 
-		console.log("End Time: " + this.endTime);		
-		console.log("Latency: "+ latency);
+		this.props.store.setTimeToStartRecord(timeToStartRecord);
+		console.log("End Time: " + endTime);		
+		console.log("timeToStartRecord: "+ timeToStartRecord);
 		
 		this.setState({ record: true });
 	}
@@ -63,7 +67,7 @@ export class AudioRecorder extends Component {
 		}
 	}
 
-	findLatency(startTime, endTime) {
+	findtimeToStartRecord(startTime, endTime) {
 		return (endTime-startTime)/1000; //divide by 1000 to strip the miliseconds
 	}
 
